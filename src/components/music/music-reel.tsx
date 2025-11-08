@@ -7,6 +7,7 @@ import type { Song } from '@/types';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
 import { Waveform } from './waveform';
+import { Slider } from '@/components/ui/slider';
 
 type MusicReelProps = {
   song: Song;
@@ -15,6 +16,7 @@ type MusicReelProps = {
 export function MusicReel({ song }: MusicReelProps) {
   const [isPlaying, setIsPlaying] = useState(false);
   const [isLiked, setIsLiked] = useState(song.liked);
+  const [progress, setProgress] = useState(30); // Example progress
 
   const togglePlay = (e: React.MouseEvent) => {
     e.stopPropagation();
@@ -81,9 +83,24 @@ export function MusicReel({ song }: MusicReelProps) {
 
         <div className="w-full max-w-md">
             {/* Song Info */}
-            <div className='mb-8'>
+            <div className='mb-6'>
                 <h1 className="text-3xl font-bold tracking-tight">{song.title}</h1>
                 <p className="text-lg text-muted-foreground mt-1">{song.artist}</p>
+            </div>
+
+            {/* Duration Slider */}
+            <div className='mb-6 w-full' onClick={(e) => e.stopPropagation()}>
+                <Slider 
+                    defaultValue={[progress]} 
+                    max={100} 
+                    step={1} 
+                    className="w-full"
+                    onValueChange={(value) => setProgress(value[0])}
+                />
+                <div className="flex justify-between text-xs text-muted-foreground mt-1.5">
+                    <span>1:23</span>
+                    <span>3:45</span>
+                </div>
             </div>
 
             {/* Controls */}

@@ -1,3 +1,40 @@
 {
-  "placeholderImages": []
+  "placeholderImages": [
+    {
+      "id": "album-art-1",
+      "description": "Abstract neon lines and shapes for M83's Midnight City.",
+      "imageUrl": "https://images.unsplash.com/photo-1702357430179-16b1ba1f5dd0?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw4fHxhYnN0cmFjdCUyMG5lb258ZW58MHx8fHwxNzYyNTU1NzU1fDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "abstract neon"
+    },
+    {
+      "id": "album-art-2",
+      "description": "Cityscape at night with bright lights for The Weeknd's Blinding Lights.",
+      "imageUrl": "https://images.unsplash.com/photo-1529619768328-e37af76c6fe5?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw2fHxjaXR5JTIwbmlnaHR8ZW58MHx8fHwxNzYyNjIxODM1fDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "city night"
+    },
+    {
+      "id": "album-art-3",
+      "description": "Starry night sky for Coldplay's A Sky Full of Stars.",
+      "imageUrl": "https://images.unsplash.com/photo-1534796636912-3b95b3ab5986?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwyfHxzdGFycnklMjBza3l8ZW58MHx8fHwxNzYyNjEwNTkyfDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "starry sky"
+    },
+    {
+      "id": "album-art-4",
+      "description": "Retro disco scene for Daft Punk's Get Lucky.",
+      "imageUrl": "https://images.unsplash.com/photo-1729462548778-7863c3d0a1a3?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwxMHx8cmV0cm8lMjBkaXNjb3xlbnwwfHx8fDE3NjI2NDA0MTF8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "retro disco"
+    },
+    {
+      "id": "album-art-5",
+      "description": "Dreamy coastal landscape for Harry Styles' Adore You.",
+      "imageUrl": "https://images.unsplash.com/photo-1567020389718-d6c1a380884d?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw1fHxkcmVhbXklMjBjb2FzdHxlbnwwfHx8fDE3NjI2NDA0MTJ8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "dreamy coast"
+    },
+    {
+      "id": "album-art-6",
+      "description": "Cosmic, galactic background for Dua Lipa's Levitating.",
+      "imageUrl": "https://images.unsplash.com/photo-1516331138075-f3adc1e149cd?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw2fHxjb3NtaWMlMjBnYWxheHl8ZW58MHx8fHwxNzYyNjQwNDExfDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "cosmic galaxy"
+    }
+  ]
 }

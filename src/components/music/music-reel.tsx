@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import Image from 'next/image';
 import { Heart, Play, Pause, Shuffle } from 'lucide-react';
 import type { Song } from '@/types';
@@ -13,27 +13,76 @@ type MusicReelProps = {
   song: Song;
 };
 
+function formatTime(seconds: number) {
+  const minutes = Math.floor(seconds / 60);
+  const remainingSeconds = Math.floor(seconds % 60);
+  return `${minutes}:${remainingSeconds.toString().padStart(2, '0')}`;
+}
+
 export function MusicReel({ song }: MusicReelProps) {
   const [isPlaying, setIsPlaying] = useState(false);
   const [isLiked, setIsLiked] = useState(song.liked);
-  const [progress, setProgress] = useState(30); // Example progress
+  const [progress, setProgress] = useState(0);
+  const [duration, setDuration] = useState(0);
+  const [currentTime, setCurrentTime] = useState(0);
+
+  const audioRef = useRef<HTMLAudioElement | null>(null);
+
+  useEffect(() => {
+    if (audioRef.current) {
+      if (isPlaying) {
+        audioRef.current.play().catch(error => console.error("Error playing audio:", error));
+      } else {
+        audioRef.current.pause();
+      }
+    }
+  }, [isPlaying]);
 
   const togglePlay = (e: React.MouseEvent) => {
     e.stopPropagation();
     setIsPlaying(!isPlaying);
   };
+
   const toggleLike = (e: React.MouseEvent) => {
     e.stopPropagation();
     setIsLiked(!isLiked);
   };
+  
   const handleNext = (e: React.MouseEvent) => {
     e.stopPropagation();
-    // In a real app, this would trigger the carousel to go to the next slide
     console.log("Next song");
-  }
+  };
+
+  const handleTimeUpdate = () => {
+    if (audioRef.current) {
+      setCurrentTime(audioRef.current.currentTime);
+      setProgress((audioRef.current.currentTime / audioRef.current.duration) * 100);
+    }
+  };
+
+  const handleLoadedMetadata = () => {
+    if (audioRef.current) {
+      setDuration(audioRef.current.duration);
+    }
+  };
+
+  const handleSliderChange = (value: number[]) => {
+    if (audioRef.current) {
+      const newTime = (value[0] / 100) * duration;
+      audioRef.current.currentTime = newTime;
+      setCurrentTime(newTime);
+    }
+  };
 
   return (
     <div className="relative h-full w-full flex flex-col items-center justify-center overflow-hidden" onClick={() => setIsPlaying(p => !p)}>
+      <audio
+        ref={audioRef}
+        src={song.audioSrc}
+        onTimeUpdate={handleTimeUpdate}
+        onLoadedMetadata={handleLoadedMetadata}
+        onEnded={() => setIsPlaying(false)}
+      />
       {/* Background Gradient */}
       <div className="absolute inset-0 z-0">
         <Image
@@ -66,16 +115,20 @@ export function MusicReel({ song }: MusicReelProps) {
                 </div>
                 <div className={cn(
                     "absolute inset-0 rounded-full bg-black/40 flex items-center justify-center transition-opacity duration-300",
-                    isPlaying ? "opacity-0 group-hover:opacity-100" : "opacity-100"
+                    isPlaying ? "opacity-0 hover:opacity-100" : "opacity-100"
                 )}>
                      <Button
                         variant="ghost"
                         size="icon"
                         className="w-24 h-24 rounded-full text-white"
                         onClick={togglePlay}
-                        aria-label='Play song'
+                        aria-label={isPlaying ? 'Pause song' : 'Play song'}
                     >
-                        <Play className="w-12 h-12 fill-current ml-1" />
+                        {isPlaying ? (
+                          <Pause className="w-12 h-12 fill-current" />
+                        ) : (
+                          <Play className="w-12 h-12 fill-current ml-1" />
+                        )}
                     </Button>
                 </div>
             </div>
@@ -91,15 +144,15 @@ export function MusicReel({ song }: MusicReelProps) {
             {/* Duration Slider */}
             <div className='mb-6 w-full' onClick={(e) => e.stopPropagation()}>
                 <Slider 
-                    defaultValue={[progress]} 
+                    value={[progress]} 
                     max={100} 
                     step={1} 
                     className="w-full"
-                    onValueChange={(value) => setProgress(value[0])}
+                    onValueChange={handleSliderChange}
                 />
                 <div className="flex justify-between text-xs text-muted-foreground mt-1.5">
-                    <span>1:23</span>
-                    <span>3:45</span>
+                    <span>{formatTime(currentTime)}</span>
+                    <span>{formatTime(duration)}</span>
                 </div>
             </div>
 

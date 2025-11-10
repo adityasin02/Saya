@@ -32,33 +32,55 @@ export function UploadSongDialog({ isOpen, setIsOpen, userId }: UploadSongDialog
     setIsProcessing(false);
   };
 
-  const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+  const handleFileChange = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (!file) return;
 
     setIsProcessing(true);
 
-    const newSong = {
-      title: file.name.replace(/\.[^/.]+$/, ""), // Use filename as title
-      artist: "Unknown Artist",
-      album: "Unknown Album",
-      albumArt: PlaceHolderImages[Math.floor(Math.random() * PlaceHolderImages.length)].imageUrl,
-      audioSrc: URL.createObjectURL(file),
-      liked: false,
-      dateAdded: serverTimestamp(),
-      playCount: 0,
-    };
+    try {
+      const audioDataUrl = await new Promise<string>((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = (e) => {
+          if (e.target && typeof e.target.result === 'string') {
+            resolve(e.target.result);
+          } else {
+            reject(new Error("Failed to read file."));
+          }
+        };
+        reader.onerror = (error) => reject(error);
+        reader.readAsDataURL(file);
+      });
 
-    const songsCollection = collection(firestore, `users/${userId}/songs`);
-    addDoc(songsCollection, newSong);
+      const newSong = {
+        title: file.name.replace(/\.[^/.]+$/, ""), // Use filename as title
+        artist: "Unknown Artist",
+        album: "Unknown Album",
+        albumArt: PlaceHolderImages[Math.floor(Math.random() * PlaceHolderImages.length)].imageUrl,
+        audioSrc: audioDataUrl,
+        liked: false,
+        dateAdded: serverTimestamp(),
+        playCount: 0,
+      };
 
-    toast({
-      title: "Song Added!",
-      description: `${newSong.title} has been added to your library.`,
-    });
+      const songsCollection = collection(firestore, `users/${userId}/songs`);
+      await addDoc(songsCollection, newSong);
 
-    setIsOpen(false);
-    resetState();
+      toast({
+        title: "Song Added!",
+        description: `${newSong.title} has been added to your library.`,
+      });
+    } catch (error) {
+      console.error("Error uploading song:", error);
+      toast({
+        variant: "destructive",
+        title: "Upload Failed",
+        description: "There was an error saving your song.",
+      });
+    } finally {
+      setIsOpen(false);
+      resetState();
+    }
   };
 
   const handleDialogClose = (open: boolean) => {

@@ -17,7 +17,7 @@ import { useFirestore, addDocumentNonBlocking } from "@/firebase";
 import { collection, serverTimestamp } from "firebase/firestore";
 import { useToast } from "@/hooks/use-toast";
 import { Loader2, Music, UploadCloud, FileCheck } from "lucide-react";
-import jsmediatags from "jsmediatags";
+import jsmediatags from "@/lib/jsmediatags";
 import type { TagType } from "jsmediatags/types";
 
 type UploadSongDialogProps = {
@@ -74,7 +74,7 @@ export function UploadSongDialog({ isOpen, setIsOpen, userId }: UploadSongDialog
         });
         setIsParsing(false);
       },
-      onError: (error) => {
+      onError: (error: any) => {
         console.error("Error reading media tags:", error);
         toast({
           title: "Metadata Error",

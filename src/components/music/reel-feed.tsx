@@ -21,9 +21,9 @@ export function ReelFeed({ songs }: ReelFeedProps) {
 
   return (
     <div className="h-full overflow-hidden" ref={emblaRef}>
-      <div className="h-full">
+      <div className="flex flex-col h-full">
         {songs.map((song) => (
-          <div className="relative flex h-full items-center justify-center" key={song.id}>
+          <div className="relative flex-[0_0_100%] h-full" key={song.id}>
             <MusicReel song={song} />
           </div>
         ))}

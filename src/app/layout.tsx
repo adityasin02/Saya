@@ -3,6 +3,7 @@ import './globals.css';
 import { Toaster } from "@/components/ui/toaster";
 import AppLayout from "@/components/layout/app-layout";
 import { cn } from '@/lib/utils';
+import { FirebaseClientProvider } from '@/firebase';
 
 export const metadata: Metadata = {
   title: 'VibeFlow – AI Music Player',
@@ -23,9 +24,11 @@ export default function RootLayout({
         <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
       </head>
       <body className={cn("font-body antialiased bg-background text-foreground", "overscroll-none")}>
-        <AppLayout>
-          {children}
-        </AppLayout>
+        <FirebaseClientProvider>
+          <AppLayout>
+            {children}
+          </AppLayout>
+        </FirebaseClientProvider>
         <Toaster />
       </body>
     </html>

@@ -1,3 +1,5 @@
+import { FieldValue } from "firebase/firestore";
+
 export type Song = {
   id: string;
   title: string;
@@ -6,4 +8,6 @@ export type Song = {
   albumArt: string;
   audioSrc: string;
   liked: boolean;
+  dateAdded?: FieldValue;
+  playCount?: number;
 };

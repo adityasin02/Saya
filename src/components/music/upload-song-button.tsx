@@ -4,9 +4,8 @@ import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Plus } from "lucide-react";
 import { UploadSongDialog } from "./upload-song-dialog";
-import type { Song } from "@/types";
 
-export function UploadSongButton({ onSongAdded }: { onSongAdded: (song: Song) => void }) {
+export function UploadSongButton({ userId }: { userId: string }) {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
 
   return (
@@ -15,9 +14,9 @@ export function UploadSongButton({ onSongAdded }: { onSongAdded: (song: Song) =>
         <Plus className="mr-2 h-4 w-4" /> Upload Song
       </Button>
       <UploadSongDialog
+        userId={userId}
         isOpen={isDialogOpen}
         setIsOpen={setIsDialogOpen}
-        onSongAdded={onSongAdded}
       />
     </>
   );

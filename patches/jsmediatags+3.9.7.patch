@@ -1,0 +1,76 @@
+diff --git a/node_modules/jsmediatags/build2/jsmediatags.js b/node_modules/jsmediatags/build2/jsmediatags.js
+index 9855b46..2228c2c 100644
+--- a/node_modules/jsmediatags/build2/jsmediatags.js
++++ b/node_modules/jsmediatags/build2/jsmediatags.js
+@@ -7472,7 +7472,7 @@
+       }
+     },
+     "../node/NodeFileReader": function (require, module, exports) {
+-      var fs = require('fs');
++      
+ 
+       function _inherits(subClass, superClass) {
+         if (typeof superClass !== "function" && superClass !== null) {
+@@ -7503,7 +7503,7 @@
+         _this._file = file;
+ 
+         _this._init(function () {
+-          fs.stat(file, function (err, stats) {
++          require('fs').stat(file, function (err, stats) {
+             if (err) {
+               if (_this._callbacks.onError) {
+                 _this._callbacks.onError(err);
+@@ -7521,7 +7521,7 @@
+ 
+       _createClass(NodeFileReader, [{
+         key: "loadRange",
+-        value: function loadRange(range, callbacks) {
++        value: function loadRange(range, callbacks) {          
+           var self = this;
+           var length = range[1] - range[0] + 1;
+ 
+@@ -7536,7 +7536,7 @@
+             }
+           };
+ 
+-          fs.open(this._file, "r", function (err, fd) {
++          require('fs').open(self._file, "r", function (err, fd) {
+             if (err) {
+               if (callbacks.onError) {
+                 callbacks.onError({
+@@ -7548,7 +7548,7 @@
+               return;
+             }
+ 
+-            fs.read(fd, buffer, 0, length, range[0], function (err, bytesRead, buffer) {
++            require('fs').read(fd, buffer, 0, length, range[0], function (err, bytesRead, buffer) {
+               if (err) {
+                 if (callbacks.onError) {
+                   callbacks.onError({
+@@ -7561,7 +7561,7 @@
+                 return;
+               }
+ 
+-              fs.close(fd, function (err) {
++              require('fs').close(fd, function (err) {
+                 if (err) {
+                   if (callbacks.onError) {
+                     callbacks.onError({
+@@ -7628,7 +7628,7 @@
+       }
+     },
+     "./ReactNativeFileReader": function (require, module, exports) {
+-      var RNFS = require('react-native-fs');
++      
+ 
+       var _require = require('buffer'),
+           Buffer = _require.Buffer;
+@@ -7675,7 +7675,7 @@
+         value: function loadRange(range, callbacks) {
+           var _this2 = this;
+ 
+-          RNFS.read(this._path, range[1] - range[0] + 1, range[0], 'base64').then(function (data) {
++          require('react-native-fs').read(_this2._path, range[1] - range[0] + 1, range[0], 'base64').then(function (data) {
+             callbacks.onSuccess(new Buffer(data, 'base64'));
+           }).catch(function (err) {
+             callbacks.onError({

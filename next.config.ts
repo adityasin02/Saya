@@ -31,22 +31,12 @@ const nextConfig: NextConfig = {
     ],
   },
   webpack: (config, { isServer }) => {
-    // This is to fix a build issue with jsmediatags
-    // See: https://github.com/aadsm/jsmediatags/issues/138
     if (!isServer) {
         config.resolve.fallback = {
             ...config.resolve.fallback,
             "fs": false,
-            "react-native-fs": false
         };
     }
-    
-    // Add another rule to handle the specific file if the fallback isn't enough
-    config.module.rules.push({
-      test: /ReactNativeFileReader\.js$/,
-      use: 'null-loader',
-    });
-    
     return config;
   }
 };

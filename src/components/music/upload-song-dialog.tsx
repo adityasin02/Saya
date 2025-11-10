@@ -18,6 +18,7 @@ import { Loader2, UploadCloud } from "lucide-react";
 import { PlaceHolderImages } from "@/lib/placeholder-images";
 import { errorEmitter } from "@/firebase/error-emitter";
 import { FirestorePermissionError } from "@/firebase/errors";
+import { localAudio } from "@/lib/local-audio-store";
 
 type UploadSongDialogProps = {
   isOpen: boolean;
@@ -67,8 +68,15 @@ export function UploadSongDialog({ isOpen, setIsOpen, userId }: UploadSongDialog
 
       const songsCollection = collection(firestore, `users/${userId}/songs`);
       
-      // We are not awaiting this to make it non-blocking
       addDoc(songsCollection, songForDb)
+        .then((docRef) => {
+            // Store the audio source locally with the new document ID
+            localAudio.set(docRef.id, audioDataUrl);
+            toast({
+                title: "Song Added!",
+                description: `${songForDb.title} has been added to your library.`,
+            });
+        })
         .catch(async (serverError) => {
             const permissionError = new FirestorePermissionError({
               path: songsCollection.path,
@@ -78,17 +86,12 @@ export function UploadSongDialog({ isOpen, setIsOpen, userId }: UploadSongDialog
             errorEmitter.emit('permission-error', permissionError);
         });
 
-
-      toast({
-        title: "Song Added!",
-        description: `${songForDb.title} has been added to your library.`,
-      });
     } catch (error) {
-      console.error("Error uploading song:", error);
+      console.error("Error processing song:", error);
       toast({
         variant: "destructive",
-        title: "Upload Failed",
-        description: "There was an error saving your song's metadata.",
+        title: "Processing Failed",
+        description: "There was an error processing your song.",
       });
     } finally {
       setIsOpen(false);

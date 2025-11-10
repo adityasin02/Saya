@@ -1,3 +1,4 @@
+
 "use client";
 
 import React, { useState, useRef, useEffect } from 'react';
@@ -8,6 +9,7 @@ import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
 import { Waveform } from './waveform';
 import { Slider } from '@/components/ui/slider';
+import { localAudio } from '@/lib/local-audio-store';
 
 type MusicReelProps = {
   song: Song;
@@ -28,15 +30,21 @@ export function MusicReel({ song }: MusicReelProps) {
 
   const audioRef = useRef<HTMLAudioElement | null>(null);
 
+  // When the component mounts or the song ID changes, get the audio source
+  const audioSrc = song.audioSrc || localAudio.get(song.id);
+
   useEffect(() => {
-    if (audioRef.current) {
+    if (audioRef.current && audioSrc) {
+      if (audioRef.current.src !== audioSrc) {
+        audioRef.current.src = audioSrc;
+      }
       if (isPlaying) {
         audioRef.current.play().catch(error => console.error("Error playing audio:", error));
       } else {
         audioRef.current.pause();
       }
     }
-  }, [isPlaying]);
+  }, [isPlaying, audioSrc]);
 
   const togglePlay = (e: React.MouseEvent) => {
     e.stopPropagation();
@@ -74,11 +82,22 @@ export function MusicReel({ song }: MusicReelProps) {
     }
   };
 
+  if (!audioSrc) {
+    return (
+        <div className="relative h-full w-full flex flex-col items-center justify-center overflow-hidden bg-background">
+            <div className="text-center">
+                <p className="text-lg text-muted-foreground">Audio for this song is not available on this device.</p>
+                <p className="text-sm text-muted-foreground/50">Please re-upload the file.</p>
+            </div>
+        </div>
+    )
+  }
+
   return (
     <div className="relative h-full w-full flex flex-col items-center justify-center overflow-hidden" onClick={() => setIsPlaying(p => !p)}>
       <audio
         ref={audioRef}
-        src={song.audioSrc}
+        src={audioSrc}
         onTimeUpdate={handleTimeUpdate}
         onLoadedMetadata={handleLoadedMetadata}
         onEnded={() => setIsPlaying(false)}

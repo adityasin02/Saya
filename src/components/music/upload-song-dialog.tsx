@@ -55,6 +55,7 @@ export function UploadSongDialog({ isOpen, setIsOpen, userId }: UploadSongDialog
     setIsParsing(true);
 
     jsmediatags.read(file, {
+      tags: ["title", "artist", "album", "picture"],
       onSuccess: (tag: TagType) => {
         const { title, artist, album, picture } = tag.tags;
         let albumArtFile = null;

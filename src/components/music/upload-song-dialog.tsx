@@ -12,8 +12,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useFirestore } from "@/firebase";
-import { addDocumentNonBlocking } from "@/firebase/non-blocking-updates";
-import { collection, serverTimestamp } from "firebase/firestore";
+import { addDoc, collection, serverTimestamp } from "firebase/firestore";
 import { useToast } from "@/hooks/use-toast";
 import { Loader2, UploadCloud } from "lucide-react";
 import jsmediatags from "@/lib/jsmediatags";
@@ -57,7 +56,7 @@ export function UploadSongDialog({ isOpen, setIsOpen, userId }: UploadSongDialog
         };
 
         const songsCollection = collection(firestore, `users/${userId}/songs`);
-        addDocumentNonBlocking(songsCollection, newSong);
+        addDoc(songsCollection, newSong);
 
         toast({
           title: "Song Added!",
@@ -83,7 +82,7 @@ export function UploadSongDialog({ isOpen, setIsOpen, userId }: UploadSongDialog
         };
 
         const songsCollection = collection(firestore, `users/${userId}/songs`);
-        addDocumentNonBlocking(songsCollection, newSong);
+        addDoc(songsCollection, newSong);
 
         toast({
           title: "Song Added!",

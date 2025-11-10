@@ -52,8 +52,6 @@
         "id",
         "title",
         "artist",
-        "filePath",
-        "duration",
         "dateAdded"
       ]
     },

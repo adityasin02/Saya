@@ -59,10 +59,10 @@ service cloud.firestore {
      * @principle Enforces document ownership for writes.
      */
     match /users/{userId}/songs/{songId} {
-      allow create: if isSignedIn() && isOwner(userId) && request.resource.data.id == songId;
+      allow create: if isSignedIn() && isOwner(userId);
       allow get: if isSignedIn() && isOwner(userId);
       allow list: if isSignedIn() && isOwner(userId);
-      allow update: if isExistingOwner(userId) && request.resource.data.id == resource.data.id;
+      allow update: if isExistingOwner(userId);
       allow delete: if isExistingOwner(userId);
     }
 

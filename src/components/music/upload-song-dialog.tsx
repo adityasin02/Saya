@@ -52,30 +52,32 @@ export function UploadSongDialog({ isOpen, setIsOpen, userId }: UploadSongDialog
         reader.readAsDataURL(file);
       });
 
-      const newSong = {
+      const songForDb = {
         title: file.name.replace(/\.[^/.]+$/, ""), // Use filename as title
         artist: "Unknown Artist",
         album: "Unknown Album",
         albumArt: PlaceHolderImages[Math.floor(Math.random() * PlaceHolderImages.length)].imageUrl,
-        audioSrc: audioDataUrl,
         liked: false,
         dateAdded: serverTimestamp(),
         playCount: 0,
+        // We explicitly DO NOT save the audioSrc to Firestore
       };
 
       const songsCollection = collection(firestore, `users/${userId}/songs`);
-      await addDoc(songsCollection, newSong);
+      
+      // We are not awaiting this to make it non-blocking
+      addDoc(songsCollection, songForDb);
 
       toast({
         title: "Song Added!",
-        description: `${newSong.title} has been added to your library.`,
+        description: `${songForDb.title} has been added to your library.`,
       });
     } catch (error) {
       console.error("Error uploading song:", error);
       toast({
         variant: "destructive",
         title: "Upload Failed",
-        description: "There was an error saving your song.",
+        description: "There was an error saving your song's metadata.",
       });
     } finally {
       setIsOpen(false);

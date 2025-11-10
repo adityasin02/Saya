@@ -107,7 +107,7 @@ export function UploadSongDialog({ isOpen, setIsOpen, userId }: UploadSongDialog
     }
   };
 
-  const handleSubmit = async () => {
+  const handleSubmit = () => {
     if (!songDetails || !songDetails.audioSrc) {
       toast({
         title: "No Song Selected",
@@ -140,28 +140,18 @@ export function UploadSongDialog({ isOpen, setIsOpen, userId }: UploadSongDialog
       dateAdded: serverTimestamp(),
       playCount: 0,
     };
+    
+    const songsCollection = collection(firestore, `users/${userId}/songs`);
+    addDocumentNonBlocking(songsCollection, newSong);
 
-    try {
-      const songsCollection = collection(firestore, `users/${userId}/songs`);
-      await addDocumentNonBlocking(songsCollection, newSong);
-
-      toast({
-        title: "Song Uploaded!",
-        description: `${newSong.title} has been added to your library.`,
-      });
-      
-      setIsOpen(false);
-      resetState();
-    } catch (error) {
-      console.error("Error uploading song:", error);
-      toast({
-        title: "Upload Failed",
-        description: "There was an error saving your song. Please try again.",
-        variant: "destructive",
-      });
-    } finally {
-      setIsUploading(false);
-    }
+    toast({
+      title: "Song Uploaded!",
+      description: `${newSong.title} has been added to your library.`,
+    });
+    
+    setIsOpen(false);
+    resetState();
+    setIsUploading(false);
   };
 
   const albumArtUrl = useMemo(() => {

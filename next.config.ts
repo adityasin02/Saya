@@ -41,6 +41,12 @@ const nextConfig: NextConfig = {
         };
     }
     
+    // Add another rule to handle the specific file if the fallback isn't enough
+    config.module.rules.push({
+      test: /ReactNativeFileReader\.js$/,
+      use: 'null-loader',
+    });
+    
     return config;
   }
 };

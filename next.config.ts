@@ -30,6 +30,19 @@ const nextConfig: NextConfig = {
       },
     ],
   },
+  webpack: (config, { isServer }) => {
+    // This is to fix a build issue with jsmediatags
+    // See: https://github.com/aadsm/jsmediatags/issues/138
+    if (!isServer) {
+        config.resolve.fallback = {
+            ...config.resolve.fallback,
+            "fs": false,
+            "react-native-fs": false
+        };
+    }
+    
+    return config;
+  }
 };
 
 export default nextConfig;

@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useState, useCallback, useMemo } from "react";
@@ -53,7 +54,7 @@ export function UploadSongDialog({ isOpen, setIsOpen, userId }: UploadSongDialog
 
     resetState();
     setIsParsing(true);
-
+    
     jsmediatags.read(file, {
       tags: ["title", "artist", "album", "picture"],
       onSuccess: (tag: TagType) => {
@@ -258,3 +259,5 @@ export function UploadSongDialog({ isOpen, setIsOpen, userId }: UploadSongDialog
     </Dialog>
   );
 }
+
+    

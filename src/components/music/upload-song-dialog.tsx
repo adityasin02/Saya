@@ -14,7 +14,8 @@ import {
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { useFirestore, addDocumentNonBlocking } from "@/firebase";
+import { useFirestore } from "@/firebase";
+import { addDocumentNonBlocking } from "@/firebase/non-blocking-updates";
 import { collection, serverTimestamp } from "firebase/firestore";
 import { useToast } from "@/hooks/use-toast";
 import { Loader2, Music, UploadCloud, FileCheck } from "lucide-react";
@@ -56,7 +57,6 @@ export function UploadSongDialog({ isOpen, setIsOpen, userId }: UploadSongDialog
     setIsParsing(true);
     
     jsmediatags.read(file, {
-      tags: ["title", "artist", "album", "picture"],
       onSuccess: (tag: TagType) => {
         const { title, artist, album, picture } = tag.tags;
         let albumArtFile = null;
@@ -259,5 +259,3 @@ export function UploadSongDialog({ isOpen, setIsOpen, userId }: UploadSongDialog
     </Dialog>
   );
 }
-
-    

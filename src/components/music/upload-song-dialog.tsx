@@ -15,8 +15,6 @@ import { useFirestore } from "@/firebase";
 import { addDoc, collection, serverTimestamp } from "firebase/firestore";
 import { useToast } from "@/hooks/use-toast";
 import { Loader2, UploadCloud } from "lucide-react";
-import jsmediatags from "@/lib/jsmediatags";
-import type { TagType } from "jsmediatags/types";
 import { PlaceHolderImages } from "@/lib/placeholder-images";
 
 type UploadSongDialogProps = {
@@ -40,59 +38,27 @@ export function UploadSongDialog({ isOpen, setIsOpen, userId }: UploadSongDialog
 
     setIsProcessing(true);
 
-    jsmediatags.read(file, {
-      onSuccess: (tag: TagType) => {
-        const { title, artist } = tag.tags;
+    const newSong = {
+      title: file.name.replace(/\.[^/.]+$/, ""), // Use filename as title
+      artist: "Unknown Artist",
+      album: "Unknown Album",
+      albumArt: PlaceHolderImages[Math.floor(Math.random() * PlaceHolderImages.length)].imageUrl,
+      audioSrc: URL.createObjectURL(file),
+      liked: false,
+      dateAdded: serverTimestamp(),
+      playCount: 0,
+    };
 
-        const newSong = {
-          title: title || file.name.replace(/\.[^/.]+$/, ""),
-          artist: artist || "Unknown Artist",
-          album: tag.tags.album || "Unknown Album",
-          albumArt: PlaceHolderImages[Math.floor(Math.random() * PlaceHolderImages.length)].imageUrl,
-          audioSrc: URL.createObjectURL(file),
-          liked: false,
-          dateAdded: serverTimestamp(),
-          playCount: 0,
-        };
+    const songsCollection = collection(firestore, `users/${userId}/songs`);
+    addDoc(songsCollection, newSong);
 
-        const songsCollection = collection(firestore, `users/${userId}/songs`);
-        addDoc(songsCollection, newSong);
-
-        toast({
-          title: "Song Added!",
-          description: `${newSong.title} has been added to your library.`,
-        });
-
-        setIsOpen(false);
-        resetState();
-      },
-      onError: (error: any) => {
-        console.error("Error reading media tags:", error);
-
-        // Still upload with filename as title
-        const newSong = {
-          title: file.name.replace(/\.[^/.]+$/, ""),
-          artist: "Unknown Artist",
-          album: "Unknown Album",
-          albumArt: PlaceHolderImages[Math.floor(Math.random() * PlaceHolderImages.length)].imageUrl,
-          audioSrc: URL.createObjectURL(file),
-          liked: false,
-          dateAdded: serverTimestamp(),
-          playCount: 0,
-        };
-
-        const songsCollection = collection(firestore, `users/${userId}/songs`);
-        addDoc(songsCollection, newSong);
-
-        toast({
-          title: "Song Added!",
-          description: `${newSong.title} has been added to your library. Metadata could not be read.`,
-        });
-        
-        setIsOpen(false);
-        resetState();
-      },
+    toast({
+      title: "Song Added!",
+      description: `${newSong.title} has been added to your library.`,
     });
+
+    setIsOpen(false);
+    resetState();
   };
 
   const handleDialogClose = (open: boolean) => {
@@ -118,7 +84,7 @@ export function UploadSongDialog({ isOpen, setIsOpen, userId }: UploadSongDialog
               {isProcessing ? (
                 <>
                   <Loader2 className="w-10 h-10 mb-3 animate-spin" />
-                  <p className="mb-2 text-sm">Processing file...</p>
+                  <p className="mb-2 text-sm">Adding to library...</p>
                 </>
               ) : (
                 <>

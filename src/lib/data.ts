@@ -1,7 +1,7 @@
 import type { Song } from '@/types';
 import { PlaceHolderImages } from '@/lib/placeholder-images';
 
-export const mockSongs: Song[] = [
+export let mockSongs: Song[] = [
   {
     id: '1',
     title: 'Midnight City',

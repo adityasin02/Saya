@@ -16,6 +16,8 @@ import { addDoc, collection, serverTimestamp } from "firebase/firestore";
 import { useToast } from "@/hooks/use-toast";
 import { Loader2, UploadCloud } from "lucide-react";
 import { PlaceHolderImages } from "@/lib/placeholder-images";
+import { errorEmitter } from "@/firebase/error-emitter";
+import { FirestorePermissionError } from "@/firebase/errors";
 
 type UploadSongDialogProps = {
   isOpen: boolean;
@@ -66,7 +68,16 @@ export function UploadSongDialog({ isOpen, setIsOpen, userId }: UploadSongDialog
       const songsCollection = collection(firestore, `users/${userId}/songs`);
       
       // We are not awaiting this to make it non-blocking
-      addDoc(songsCollection, songForDb);
+      addDoc(songsCollection, songForDb)
+        .catch(async (serverError) => {
+            const permissionError = new FirestorePermissionError({
+              path: songsCollection.path,
+              operation: 'create',
+              requestResourceData: songForDb,
+            });
+            errorEmitter.emit('permission-error', permissionError);
+        });
+
 
       toast({
         title: "Song Added!",

@@ -658,7 +658,7 @@ class ID3v1TagReader extends MediaTagReader {
       const year = data.getStringAt(offset + 93, 4).replace(/\0/g, "");
 
       const trackFlag = data.getByteAt(offset + 97 + 28);
-      const track = data.getByteAt(offset + 97 + 29);
+      let track = data.getByteAt(offset + 97 + 29);
       
       let comment, version;
 

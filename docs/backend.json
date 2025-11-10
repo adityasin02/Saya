@@ -1,0 +1,256 @@
+{
+  "entities": {
+    "Song": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "Song",
+      "type": "object",
+      "description": "Represents a song in the user's local library.",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique identifier for the song."
+        },
+        "title": {
+          "type": "string",
+          "description": "The title of the song."
+        },
+        "artist": {
+          "type": "string",
+          "description": "The artist of the song."
+        },
+        "album": {
+          "type": "string",
+          "description": "The album the song belongs to."
+        },
+        "filePath": {
+          "type": "string",
+          "description": "The file path to the song on the device."
+        },
+        "artworkPath": {
+          "type": "string",
+          "description": "The file path to the album artwork image."
+        },
+        "duration": {
+          "type": "number",
+          "description": "The duration of the song in seconds."
+        },
+        "genre": {
+          "type": "string",
+          "description": "The genre of the song."
+        },
+        "playCount": {
+          "type": "number",
+          "description": "The number of times the song has been played."
+        },
+        "dateAdded": {
+          "type": "string",
+          "description": "The date and time the song was added to the library.",
+          "format": "date-time"
+        }
+      },
+      "required": [
+        "id",
+        "title",
+        "artist",
+        "filePath",
+        "duration",
+        "dateAdded"
+      ]
+    },
+    "Playlist": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "Playlist",
+      "type": "object",
+      "description": "Represents a user-created playlist.",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique identifier for the playlist."
+        },
+        "name": {
+          "type": "string",
+          "description": "The name of the playlist."
+        },
+        "description": {
+          "type": "string",
+          "description": "A description of the playlist."
+        },
+        "songIds": {
+          "type": "array",
+          "description": "References to Songs. (Relationship: Playlist N:N Song)",
+          "items": {
+            "type": "string"
+          }
+        },
+        "dateCreated": {
+          "type": "string",
+          "description": "The date and time the playlist was created.",
+          "format": "date-time"
+        }
+      },
+      "required": [
+        "id",
+        "name",
+        "dateCreated"
+      ]
+    },
+    "UserPreferences": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "UserPreferences",
+      "type": "object",
+      "description": "Stores user-specific preferences.",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique identifier for the user preferences.  This could be the same as the User ID if there's a 1:1 relationship."
+        },
+        "theme": {
+          "type": "string",
+          "description": "The user's preferred theme (e.g., Dark, Neon)."
+        },
+        "aiPersonalization": {
+          "type": "boolean",
+          "description": "Whether AI personalization is enabled."
+        },
+        "equalizerPreset": {
+          "type": "string",
+          "description": "The user's preferred equalizer preset (e.g., Bass Boost, Acoustic)."
+        },
+        "offlineMode": {
+          "type": "boolean",
+          "description": "Whether offline mode is enabled."
+        }
+      },
+      "required": [
+        "id"
+      ]
+    },
+    "AIRecommendation": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "AIRecommendation",
+      "type": "object",
+      "description": "Stores AI-generated music recommendations.",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique identifier for the recommendation."
+        },
+        "userId": {
+          "type": "string",
+          "description": "Reference to UserPreferences. (Relationship: UserPreferences 1:N AIRecommendation)"
+        },
+        "songId": {
+          "type": "string",
+          "description": "Reference to Song. (Relationship: Song 1:N AIRecommendation)"
+        },
+        "recommendationType": {
+          "type": "string",
+          "description": "The type of recommendation (e.g., Mood Boost, Chill Vibes)."
+        },
+        "dateCreated": {
+          "type": "string",
+          "description": "The date and time the recommendation was created.",
+          "format": "date-time"
+        }
+      },
+      "required": [
+        "id",
+        "userId",
+        "songId",
+        "recommendationType",
+        "dateCreated"
+      ]
+    }
+  },
+  "auth": {
+    "providers": [
+      "password",
+      "anonymous"
+    ]
+  },
+  "firestore": {
+    "structure": [
+      {
+        "path": "/users/{userId}/songs/{songId}",
+        "definition": {
+          "entityName": "Song",
+          "schema": {
+            "$ref": "#/backend/entities/Song"
+          },
+          "description": "Stores songs uploaded by each user. Path-based ownership simplifies security rules.",
+          "params": [
+            {
+              "name": "userId",
+              "description": "The ID of the user."
+            },
+            {
+              "name": "songId",
+              "description": "The ID of the song."
+            }
+          ]
+        }
+      },
+      {
+        "path": "/users/{userId}/playlists/{playlistId}",
+        "definition": {
+          "entityName": "Playlist",
+          "schema": {
+            "$ref": "#/backend/entities/Playlist"
+          },
+          "description": "Stores playlists created by each user.  Includes denormalized 'songIds' array for authorization independence when retrieving songs.",
+          "params": [
+            {
+              "name": "userId",
+              "description": "The ID of the user."
+            },
+            {
+              "name": "playlistId",
+              "description": "The ID of the playlist."
+            }
+          ]
+        }
+      },
+      {
+        "path": "/users/{userId}/preferences/{preferenceId}",
+        "definition": {
+          "entityName": "UserPreferences",
+          "schema": {
+            "$ref": "#/backend/entities/UserPreferences"
+          },
+          "description": "Stores user preferences. There will only ever be one UserPreferences document per user, so we can name the document after the userId.",
+          "params": [
+            {
+              "name": "userId",
+              "description": "The ID of the user."
+            },
+            {
+              "name": "preferenceId",
+              "description": "The preferenceId is the same as the userId"
+            }
+          ]
+        }
+      },
+      {
+        "path": "/users/{userId}/recommendations/{recommendationId}",
+        "definition": {
+          "entityName": "AIRecommendation",
+          "schema": {
+            "$ref": "#/backend/entities/AIRecommendation"
+          },
+          "description": "Stores AI recommendations for each user.",
+          "params": [
+            {
+              "name": "userId",
+              "description": "The ID of the user."
+            },
+            {
+              "name": "recommendationId",
+              "description": "The ID of the AI recommendation."
+            }
+          ]
+        }
+      }
+    ],
+    "reasoning": "The Firestore structure prioritizes authorization independence and efficient data access for the VibeLoop music player. User-owned data (songs, playlists, preferences, AI recommendations) are stored under their respective user IDs, enabling path-based ownership and simplifying security rules. To guarantee authorization independence, the `songIds` field in the Playlist object is used to reference all the songs in a certain playlist. This means when retrieving the song in the playlist, we don't need to access the playlist documents. This provides a flat data structure and better performance."
+  }
+}

@@ -5,7 +5,6 @@ import useEmblaCarousel from 'embla-carousel-react';
 import { type EmblaOptionsType } from 'embla-carousel';
 import { MusicReel } from './music-reel';
 import type { Song } from '@/types';
-import { localAudio } from '@/lib/local-audio-store';
 
 const OPTIONS: EmblaOptionsType = {
   axis: 'y',
@@ -15,6 +14,19 @@ const OPTIONS: EmblaOptionsType = {
 
 export function ReelFeed({ songs }: { songs: Song[] }) {
   const [emblaRef, emblaApi] = useEmblaCarousel(OPTIONS);
+  const [activeIndex, setActiveIndex] = React.useState(0);
+
+  React.useEffect(() => {
+    if (!emblaApi) return;
+    const onSelect = () => {
+      setActiveIndex(emblaApi.selectedScrollSnap());
+    };
+    emblaApi.on('select', onSelect);
+    return () => {
+      emblaApi.off('select', onSelect);
+    };
+  }, [emblaApi]);
+
 
   const handleNext = React.useCallback(() => {
     if (emblaApi) emblaApi.scrollNext();
@@ -31,7 +43,7 @@ export function ReelFeed({ songs }: { songs: Song[] }) {
           <div className="relative flex-[0_0_100%] h-full" key={song.id}>
             <MusicReel 
               song={song} 
-              isActive={index === emblaApi?.selectedScrollSnap()}
+              isActive={index === activeIndex}
               onNext={handleNext}
             />
           </div>

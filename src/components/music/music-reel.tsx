@@ -2,7 +2,7 @@
 
 import React, { useState, useRef, useEffect, useCallback } from 'react';
 import Image from 'next/image';
-import { Heart, Play, Pause, ListMusic, Music } from 'lucide-react';
+import { Heart, Play, Pause, ListMusic, Music, SkipForward } from 'lucide-react';
 import type { Song } from '@/types';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
@@ -100,6 +100,7 @@ export function MusicReel({ song, isActive, onNext }: MusicReelProps) {
       // eslint-disable-next-line react-hooks/exhaustive-deps
       audio.removeEventListener('canplay', () => setDuration(audio.duration));
       audio.pause();
+      audio.src = '';
     };
   }, [onNext, isActive]);
 
@@ -227,7 +228,7 @@ export function MusicReel({ song, isActive, onNext }: MusicReelProps) {
               }}
               aria-label="Shuffle/Next"
             >
-              <ListMusic className="w-7 h-7 text-foreground" />
+              <SkipForward className="w-7 h-7 text-foreground" />
             </Button>
           </div>
 

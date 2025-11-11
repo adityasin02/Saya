@@ -29,7 +29,7 @@ export default function SettingsPage() {
         <Card>
           <CardHeader>
             <CardTitle>AI & Personalization</CardTitle>
-            <CardDescription>Manage how VibeFlow personalizes your experience.</CardDescription>
+            <CardDescription>Manage how Saya personalizes your experience.</CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="flex items-center justify-between">

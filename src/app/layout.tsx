@@ -6,7 +6,7 @@ import { cn } from '@/lib/utils';
 import { FirebaseClientProvider } from '@/firebase';
 
 export const metadata: Metadata = {
-  title: 'VibeFlow – AI Music Player',
+  title: 'Saya',
   description: 'A modern, AI-powered music player with a reel-style interface.',
   viewport: 'width=device-width, initial-scale=1, maximum-scale=1',
 };

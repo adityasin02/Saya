@@ -1,3 +1,4 @@
+
 "use client";
 
 import React, { createContext, useContext, useState, useEffect, useRef, useCallback, ReactNode } from 'react';
@@ -53,15 +54,23 @@ export function MusicPlayerProvider({ children }: { children: ReactNode }) {
 
     const handleEnded = () => playNext();
 
+    const handleCanPlay = () => {
+        if (isPlaying) {
+            audio.play().catch(e => console.error("Error playing audio on canplay:", e));
+        }
+    }
+
     audio.addEventListener('timeupdate', handleTimeUpdate);
     audio.addEventListener('ended', handleEnded);
+    audio.addEventListener('canplay', handleCanPlay);
 
     return () => {
       audio.removeEventListener('timeupdate', handleTimeUpdate);
       audio.removeEventListener('ended', handleEnded);
+      audio.removeEventListener('canplay', handleCanPlay);
       audio.pause();
     };
-  }, []);
+  }, [isPlaying]); // Add isPlaying dependency
 
   const playNext = useCallback(() => {
     setCurrentSongIndex((prevIndex) => (prevIndex + 1) % playlist.length);
@@ -73,19 +82,25 @@ export function MusicPlayerProvider({ children }: { children: ReactNode }) {
         if (audioSrc && audioRef.current.src !== audioSrc) {
             audioRef.current.src = audioSrc;
             currentSong.audioSrc = audioSrc;
-        }
-        if (isPlaying && audioSrc) {
-            audioRef.current.play().catch(e => console.error("Error playing audio:", e));
-        } else {
+            // The 'canplay' event listener will handle playing
+        } else if (!audioSrc) {
             audioRef.current.pause();
         }
+        
+        if (isPlaying && audioSrc && audioRef.current.readyState >= 3) { // HAVE_FUTURE_DATA or more
+            audioRef.current.play().catch(e => console.error("Error playing audio:", e));
+        } else if (!isPlaying) {
+            audioRef.current.pause();
+        }
+    } else if (audioRef.current) {
+        audioRef.current.pause();
     }
   }, [currentSong, isPlaying]);
 
   const setPlaylist = (songs: Song[], startIndex = 0) => {
     setPlaylistState(songs);
     setCurrentSongIndex(startIndex);
-    // Don't auto-play, wait for user action
+    setIsPlaying(false); // Don't auto-play, wait for user action
   };
 
   const playSongAt = (index: number) => {

@@ -154,7 +154,7 @@ export function UploadSongDialog({ isOpen, setIsOpen, userId }: UploadSongDialog
                 <>
                   <UploadCloud className="w-10 h-10 mb-3" />
                   <p className="mb-2 text-sm"><span className="font-semibold">Click to upload</span> or drag and drop</p>
-                  <p className="text-xs">Files or a Folder (MP3, FLAC, WAV, etc.)</p>
+                  <p className="text-xs">Songs or Folders (MP3, FLAC, WAV, etc.)</p>
                 </>
               )}
             </div>

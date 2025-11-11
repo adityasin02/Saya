@@ -52,57 +52,63 @@ export function MusicReel({ song, isActive, onNext }: MusicReelProps) {
 
   useEffect(() => {
     if (isActive) {
+      if (!audioRef.current) {
+        audioRef.current = new Audio();
+        audioRef.current.volume = 0.7;
+      }
+      const audio = audioRef.current;
       const audioSrc = localAudio.get(song.id);
-      if (audioSrc && audioRef.current) {
-        if (audioRef.current.src !== audioSrc) {
-          audioRef.current.src = audioSrc;
+
+      const updateProgress = () => {
+        if (!audio.seeking) {
+            setCurrentTime(audio.currentTime);
+            setDuration(audio.duration);
+            setProgress((audio.currentTime / audio.duration) * 100 || 0);
         }
-        audioRef.current.play().catch(e => console.error('Audio play failed', e));
+      };
+      const handleSongEnd = () => onNext();
+      const handleCanPlay = () => {
+        setDuration(audio.duration);
+        audio.play().catch(e => console.error('Audio play failed on canplay', e));
         setIsPlaying(true);
-      } else {
+      };
+      
+      audio.addEventListener('timeupdate', updateProgress);
+      audio.addEventListener('ended', handleSongEnd);
+      audio.addEventListener('canplay', handleCanPlay);
+
+      if (audioSrc && audio.src !== audioSrc) {
+        audio.src = audioSrc;
+        audio.load();
+      } else if (!audioSrc) {
         setIsPlaying(false);
+      } else if (audioSrc && audio.paused) {
+        audio.play().catch(e => console.error('Audio play failed', e));
+        setIsPlaying(true);
       }
+
+      return () => {
+        audio.removeEventListener('timeupdate', updateProgress);
+        audio.removeEventListener('ended', handleSongEnd);
+        audio.removeEventListener('canplay', handleCanPlay);
+      };
     } else {
-      if (audioRef.current) {
-        audioRef.current.pause();
-        audioRef.current.currentTime = 0;
-      }
-      setIsPlaying(false);
+        if (audioRef.current) {
+            audioRef.current.pause();
+            setIsPlaying(false);
+        }
     }
-  }, [isActive, song.id]);
+  }, [isActive, song.id, onNext]);
 
   useEffect(() => {
-    const audio = (audioRef.current = new Audio());
-    audio.volume = 0.7; // Example volume
-
-    const updateProgress = () => {
-      if (audio.duration > 0) {
-        setCurrentTime(audio.currentTime);
-        setDuration(audio.duration);
-        setProgress((audio.currentTime / audio.duration) * 100);
+    return () => {
+      if (audioRef.current) {
+        audioRef.current.pause();
+        audioRef.current.src = '';
+        audioRef.current = null;
       }
     };
-    const handleSongEnd = () => onNext();
-
-    audio.addEventListener('timeupdate', updateProgress);
-    audio.addEventListener('ended', handleSongEnd);
-    audio.addEventListener('canplay', () => {
-        setDuration(audio.duration);
-        if (isActive) {
-            audio.play().catch(e => console.error('Audio play failed on canplay', e));
-            setIsPlaying(true);
-        }
-    });
-
-    return () => {
-      audio.removeEventListener('timeupdate', updateProgress);
-      audio.removeEventListener('ended', handleSongEnd);
-      // eslint-disable-next-line react-hooks/exhaustive-deps
-      audio.removeEventListener('canplay', () => setDuration(audio.duration));
-      audio.pause();
-      audio.src = '';
-    };
-  }, [onNext, isActive]);
+  }, []);
 
   const handleSeek = (value: number[]) => {
     if (audioRef.current && isFinite(audioRef.current.duration)) {

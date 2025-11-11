@@ -14,7 +14,8 @@ const OPTIONS: EmblaOptionsType = {
 
 export function ReelFeed() {
   const { playlist, currentSongIndex, playSongAt } = useMusicPlayer();
-  const [emblaRef, emblaApi] = useEmblaCarousel({ ...OPTIONS, startIndex: currentSongIndex });
+  // Pass playlist to options to re-init on playlist change
+  const [emblaRef, emblaApi] = useEmblaCarousel({ ...OPTIONS, startIndex: currentSongIndex }, [], { playlist });
 
   useEffect(() => {
     if (!emblaApi) return;
@@ -24,10 +25,8 @@ export function ReelFeed() {
     };
 
     emblaApi.on('select', onSelect);
-
-    // This is the cleanup function that runs when the component unmounts.
-    // It is essential that this function does NOT call pause() or any other
-    // function that would interrupt playback when navigating away.
+    
+    // Cleanup
     return () => {
       emblaApi.off('select', onSelect);
     };

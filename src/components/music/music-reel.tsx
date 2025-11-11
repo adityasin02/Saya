@@ -123,16 +123,16 @@ export function MusicReel({ song, isPlaying, isActive, onPlayPause, onNext }: Mu
         onLoadedMetadata={handleLoadedMetadata}
         onEnded={handleEnded}
       />
-      {/* Background Gradient */}
+      {/* Background */}
       <div className="absolute inset-0 z-0">
         <Image
           src={song.albumArt}
           alt={`Background for ${song.title}`}
           fill
-          className="object-cover blur-3xl scale-125 opacity-30"
-          data-ai-hint="abstract background"
+          className="object-cover"
+          data-ai-hint="album art"
         />
-        <div className="absolute inset-0 bg-gradient-to-b from-transparent via-transparent to-background" />
+        <div className="absolute inset-0 bg-black/60 bg-gradient-to-b from-black/30 via-black/50 to-black/80" />
       </div>
       
       <div className="relative z-10 flex flex-col items-center justify-center text-center text-foreground w-full h-full p-8 pb-24">

@@ -13,23 +13,33 @@ const OPTIONS: EmblaOptionsType = {
 };
 
 export function ReelFeed() {
-  const { playlist, currentSongIndex, playSongAt } = useMusicPlayer();
+  const { playlist, currentSongIndex, playSongAt, isPlaying } = useMusicPlayer();
   const [emblaRef, emblaApi] = useEmblaCarousel({ ...OPTIONS, startIndex: currentSongIndex });
 
   useEffect(() => {
     if (!emblaApi) return;
+    
     const onSelect = () => {
-      playSongAt(emblaApi.selectedScrollSnap());
+      // Only start playing the new song if the user was already playing music.
+      // This prevents auto-play when they first land on the page.
+      if (isPlaying) {
+        playSongAt(emblaApi.selectedScrollSnap());
+      }
     };
+
     emblaApi.on('select', onSelect);
+
+    // This is the cleanup function that runs when the component unmounts.
+    // It is essential that this function does NOT call pause() or any other
+    // function that would interrupt playback when navigating away.
     return () => {
       emblaApi.off('select', onSelect);
     };
-  }, [emblaApi, playSongAt]);
+  }, [emblaApi, playSongAt, isPlaying]);
 
   useEffect(() => {
     if (emblaApi && emblaApi.selectedScrollSnap() !== currentSongIndex) {
-      emblaApi.scrollTo(currentSongIndex);
+      emblaApi.scrollTo(currentSongIndex, true); // Use instant scroll to avoid animation conflicts
     }
   }, [currentSongIndex, emblaApi]);
 

@@ -10,6 +10,7 @@ import { UploadSongButton } from '@/components/music/upload-song-button';
 import { Button } from '@/components/ui/button';
 import { Plus } from 'lucide-react';
 import { UploadSongDialog } from "@/components/music/upload-song-dialog";
+import { Logo } from '@/components/icons/logo';
 
 export default function HomePage() {
   const { user, isUserLoading } = useUser();
@@ -56,7 +57,8 @@ export default function HomePage() {
         <ReelFeed songs={songs} />
       ) : (
         <div className="h-screen w-full flex flex-col items-center justify-center text-center p-4">
-          <p className="text-lg mb-4">No songs in your library yet.</p>
+          <Logo className="w-32 h-auto mb-8" />
+          <p className="text-lg mb-4 text-muted-foreground">No songs in your library yet.</p>
           {user && <UploadSongButton userId={user.uid} />}
         </div>
       )}

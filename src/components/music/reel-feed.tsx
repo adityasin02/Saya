@@ -13,18 +13,14 @@ const OPTIONS: EmblaOptionsType = {
 };
 
 export function ReelFeed() {
-  const { playlist, currentSongIndex, playSongAt, isPlaying } = useMusicPlayer();
+  const { playlist, currentSongIndex, playSongAt } = useMusicPlayer();
   const [emblaRef, emblaApi] = useEmblaCarousel({ ...OPTIONS, startIndex: currentSongIndex });
 
   useEffect(() => {
     if (!emblaApi) return;
     
     const onSelect = () => {
-      // Only start playing the new song if the user was already playing music.
-      // This prevents auto-play when they first land on the page.
-      if (isPlaying) {
-        playSongAt(emblaApi.selectedScrollSnap());
-      }
+      playSongAt(emblaApi.selectedScrollSnap());
     };
 
     emblaApi.on('select', onSelect);
@@ -35,7 +31,7 @@ export function ReelFeed() {
     return () => {
       emblaApi.off('select', onSelect);
     };
-  }, [emblaApi, playSongAt, isPlaying]);
+  }, [emblaApi, playSongAt]);
 
   useEffect(() => {
     if (emblaApi && emblaApi.selectedScrollSnap() !== currentSongIndex) {

@@ -5,6 +5,8 @@ import BottomNav from './bottom-nav';
 import { useAuth, useFirebase } from '@/firebase';
 import { initiateAnonymousSignIn } from '@/firebase/non-blocking-login';
 import { useEffect } from 'react';
+import { cn } from '@/lib/utils';
+import { ScrollArea } from '../ui/scroll-area';
 
 export default function AppLayout({ children }: { children: ReactNode }) {
   const { user, isUserLoading } = useFirebase();
@@ -24,7 +26,11 @@ export default function AppLayout({ children }: { children: ReactNode }) {
         style={{ aspectRatio: '9 / 20' }}
       >
         <div className="h-full w-full flex flex-col">
-            <main className="flex-1 overflow-y-auto pb-16">{children}</main>
+            <main className="flex-1 overflow-y-auto pb-16">
+              <ScrollArea className="h-full w-full">
+                {children}
+              </ScrollArea>
+            </main>
             <BottomNav />
         </div>
       </div>

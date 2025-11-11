@@ -1,6 +1,7 @@
+
 "use client";
 
-import React from 'react';
+import React, { useState } from 'react';
 import Image from 'next/image';
 import { Heart, Play, Pause, ListMusic } from 'lucide-react';
 import type { Song } from '@/types';
@@ -36,16 +37,30 @@ export function MusicReel({ song, isActive }: MusicReelProps) {
         toggleLike
     } = useMusicPlayer();
 
+    // Local state to manage whether the user is actively sliding
+    const [isSeeking, setIsSeeking] = useState(false);
+    const [seekProgress, setSeekProgress] = useState(0);
+
     const handleSliderChange = (value: number[]) => {
-      seek(value[0]);
+      // When user slides, update local seek progress, not the global state directly
+      setIsSeeking(true);
+      setSeekProgress(value[0]);
     };
     
+    const handleSliderCommit = (value: number[]) => {
+      // When user releases the slider, perform the seek and sync states
+      seek(value[0]);
+      setIsSeeking(false);
+    };
+
     const displaySong = isActive ? currentSong : song;
 
     if (!displaySong) return null;
 
     const audioSrc = displaySong.audioSrc;
     const isLiked = displaySong.liked;
+
+    const currentProgress = isSeeking ? seekProgress : (isActive ? progress : 0);
 
     if (!audioSrc && isActive) {
       return (
@@ -151,11 +166,12 @@ export function MusicReel({ song, isActive }: MusicReelProps) {
 
             <div className='w-full' onClick={(e) => e.stopPropagation()}>
                 <Slider 
-                    value={isActive ? [progress] : [0]}
+                    value={[currentProgress]}
                     max={100} 
                     step={1} 
                     className="w-full"
                     onValueChange={handleSliderChange}
+                    onValueCommit={handleSliderCommit}
                 />
                 <div className="flex justify-between text-xs text-muted-foreground mt-1.5">
                     <span>{formatTime(isActive ? currentTime : 0)}</span>

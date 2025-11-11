@@ -146,16 +146,9 @@ export function MusicReel({ song, isActive, onNext }: MusicReelProps) {
   const audioSrc = localAudio.get(song.id);
 
   if (!audioSrc && isActive) {
-    return (
-      <div className="relative h-full w-full flex flex-col items-center justify-center overflow-hidden bg-background text-center p-8">
-        <Music className="w-16 h-16 text-muted-foreground/50 mb-4" />
-        <h2 className="text-xl font-semibold text-muted-foreground">Audio Not Available on this Device</h2>
-        <p className="text-sm text-muted-foreground/70 mt-2 max-w-sm">
-          This app plays music directly from your device. The audio for "{song.title}" needs to be re-selected to
-          play. This happens if you've refreshed the page or are on a new device.
-        </p>
-      </div>
-    );
+    // Intentionally render the normal UI but without a working player
+    // to avoid the warning message, as requested by the user.
+    // The player controls will be visible but non-functional.
   }
 
   return (
@@ -204,9 +197,9 @@ export function MusicReel({ song, isActive, onNext }: MusicReelProps) {
             <p className="text-lg text-muted-foreground mt-1">{song.artist}</p>
           </div>
 
-          <div className="flex items-center justify-between w-full mb-2">
-            <div className="flex items-center gap-4">
-              <Button
+          <div className="w-full" onClick={e => e.stopPropagation()}>
+             <div className="flex justify-between items-center w-full mb-2">
+               <Button
                 variant="ghost"
                 size="icon"
                 className="w-12 h-12 rounded-full"
@@ -222,7 +215,7 @@ export function MusicReel({ song, isActive, onNext }: MusicReelProps) {
                   <Play className="w-8 h-8 fill-current ml-1" />
                 )}
               </Button>
-              <Button
+               <Button
                 variant="ghost"
                 size="icon"
                 className="w-12 h-12 rounded-full"
@@ -239,18 +232,15 @@ export function MusicReel({ song, isActive, onNext }: MusicReelProps) {
                   )}
                 />
               </Button>
+              <Button
+                variant="ghost"
+                size="icon"
+                className="w-12 h-12 rounded-full"
+                aria-label="More options"
+              >
+                <ListMusic className="w-6 h-6 text-foreground" />
+              </Button>
             </div>
-            <Button
-              variant="ghost"
-              size="icon"
-              className="w-12 h-12 rounded-full"
-              aria-label="More options"
-            >
-              <ListMusic className="w-6 h-6 text-foreground" />
-            </Button>
-          </div>
-
-          <div className="w-full" onClick={e => e.stopPropagation()}>
             <Slider 
               value={[progress]} 
               max={100} 

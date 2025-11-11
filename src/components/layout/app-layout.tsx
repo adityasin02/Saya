@@ -23,7 +23,7 @@ export default function AppLayout({ children }: { children: ReactNode }) {
       {/* Aspect ratio container */}
       <div 
         className="w-full max-w-[400px] bg-background shadow-2xl rounded-3xl overflow-hidden relative"
-        style={{ aspectRatio: '9 / 20' }}
+        style={{ aspectRatio: '20 / 9' }}
       >
         <div className="h-full w-full flex flex-col">
             <main className="flex-1 overflow-y-auto pb-16">

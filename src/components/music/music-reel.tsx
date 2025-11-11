@@ -3,7 +3,7 @@
 
 import React, { useState, useRef, useEffect } from 'react';
 import Image from 'next/image';
-import { Heart, Play, Pause, Shuffle, Music } from 'lucide-react';
+import { Heart, Play, Pause, Shuffle, Music, ListMusic } from 'lucide-react';
 import type { Song } from '@/types';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
@@ -173,24 +173,6 @@ export function MusicReel({ song, isPlaying, isActive, onPlayPause, onNext }: Mu
                 )}>
                     <Waveform />
                 </div>
-                <div className={cn(
-                    "absolute inset-0 rounded-full bg-black/40 flex items-center justify-center transition-opacity duration-300",
-                    isPlaying && isActive ? "opacity-0 hover:opacity-100" : "opacity-100"
-                )}>
-                     <Button
-                        variant="ghost"
-                        size="icon"
-                        className="w-24 h-24 rounded-full text-white"
-                        onClick={togglePlay}
-                        aria-label={isPlaying ? 'Pause song' : 'Play song'}
-                    >
-                        {isPlaying && isActive ? (
-                          <Pause className="w-12 h-12 fill-current" />
-                        ) : (
-                          <Play className="w-12 h-12 fill-current ml-1" />
-                        )}
-                    </Button>
-                </div>
             </div>
         </div>
 
@@ -201,8 +183,51 @@ export function MusicReel({ song, isPlaying, isActive, onPlayPause, onNext }: Mu
                 <p className="text-lg text-muted-foreground mt-1">{song.artist}</p>
             </div>
 
+            {/* Controls */}
+            <div className="flex items-center justify-between w-full mb-4">
+              <div className='flex items-center gap-4'>
+                <Button
+                    variant="ghost"
+                    size="icon"
+                    className="w-16 h-16 rounded-full"
+                    onClick={togglePlay}
+                    aria-label={isPlaying ? 'Pause song' : 'Play song'}
+                >
+                    {isPlaying && isActive ? (
+                      <Pause className="w-8 h-8 fill-current" />
+                    ) : (
+                      <Play className="w-8 h-8 fill-current ml-1" />
+                    )}
+                </Button>
+                 <Button
+                    variant="ghost"
+                    size="icon"
+                    className="w-16 h-16 rounded-full"
+                    onClick={toggleLike}
+                    aria-label="Like song"
+                >
+                    <Heart
+                    className={cn(
+                        'w-8 h-8 transition-all',
+                        isLiked ? 'text-primary fill-current' : 'text-foreground'
+                    )}
+                    />
+                </Button>
+              </div>
+            
+              <Button
+                  variant="ghost"
+                  size="icon"
+                  className="w-16 h-16 rounded-full"
+                  onClick={handleNext}
+                  aria-label="Shuffle/Next"
+              >
+                  <ListMusic className="w-7 h-7 text-foreground" />
+              </Button>
+            </div>
+
             {/* Duration Slider */}
-            <div className='mb-6 w-full' onClick={(e) => e.stopPropagation()}>
+            <div className='w-full' onClick={(e) => e.stopPropagation()}>
                 <Slider 
                     value={isActive ? [progress] : [0]}
                     max={100} 
@@ -214,34 +239,6 @@ export function MusicReel({ song, isPlaying, isActive, onPlayPause, onNext }: Mu
                     <span>{formatTime(isActive ? currentTime: 0)}</span>
                     <span>{formatTime(duration)}</span>
                 </div>
-            </div>
-
-            {/* Controls */}
-            <div className="flex items-center justify-between w-full">
-            <Button
-                variant="ghost"
-                size="icon"
-                className="w-16 h-16 rounded-full"
-                onClick={toggleLike}
-                aria-label="Like song"
-            >
-                <Heart
-                className={cn(
-                    'w-8 h-8 transition-all',
-                    isLiked ? 'text-primary fill-current' : 'text-foreground'
-                )}
-                />
-            </Button>
-            
-            <Button
-                variant="ghost"
-                size="icon"
-                className="w-16 h-16 rounded-full"
-                onClick={handleNext}
-                aria-label="Shuffle/Next"
-            >
-                <Shuffle className="w-8 h-8 text-foreground" />
-            </Button>
             </div>
         </div>
       </div>

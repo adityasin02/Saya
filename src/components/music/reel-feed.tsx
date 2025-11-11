@@ -38,7 +38,7 @@ export function ReelFeed() {
 
   useEffect(() => {
     if (emblaApi && emblaApi.selectedScrollSnap() !== currentSongIndex) {
-      emblaApi.scrollTo(currentSongIndex, true); // Use instant scroll to avoid animation conflicts
+      emblaApi.scrollTo(currentSongIndex);
     }
   }, [currentSongIndex, emblaApi]);
 

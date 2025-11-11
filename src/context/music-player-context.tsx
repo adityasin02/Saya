@@ -56,20 +56,12 @@ export function MusicPlayerProvider({ children }: { children: ReactNode }) {
 
     const handleEnded = () => playNext();
 
-    const handleCanPlay = () => {
-        if (isPlaying) {
-            audio.play().catch(e => console.error("Error playing audio on canplay:", e));
-        }
-    }
-
     audio.addEventListener('timeupdate', handleTimeUpdate);
     audio.addEventListener('ended', handleEnded);
-    audio.addEventListener('canplay', handleCanPlay);
 
     return () => {
       audio.removeEventListener('timeupdate', handleTimeUpdate);
       audio.removeEventListener('ended', handleEnded);
-      audio.removeEventListener('canplay', handleCanPlay);
       audio.pause();
     };
   }, []);
@@ -86,17 +78,13 @@ export function MusicPlayerProvider({ children }: { children: ReactNode }) {
         // Only change src if it's different to prevent re-loading the same audio
         if (audioSrc && audioRef.current.src !== audioSrc) {
             audioRef.current.src = audioSrc;
-            // The 'canplay' event will handle playing if isPlaying is true.
         } else if (!audioSrc) {
             audioRef.current.src = ''; // Clear src if not available
             audioRef.current.pause();
         }
         
         if (isPlaying && audioSrc) {
-            // Check if ready to play, otherwise the 'canplay' event will handle it
-            if (audioRef.current.readyState >= 2) { // HAVE_CURRENT_DATA or more
-                audioRef.current.play().catch(e => console.error("Error playing audio:", e));
-            }
+            audioRef.current.play().catch(e => console.error("Error playing audio:", e));
         } else {
             audioRef.current.pause();
         }

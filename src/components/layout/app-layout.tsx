@@ -18,8 +18,10 @@ export default function AppLayout({ children }: { children: ReactNode }) {
 
   return (
     <div className="relative min-h-screen w-full bg-background">
-      <main>{children}</main>
-      <BottomNav />
+      <div className="mx-auto max-w-md h-screen flex flex-col shadow-2xl">
+        <main className="flex-1 overflow-y-auto">{children}</main>
+        <BottomNav />
+      </div>
     </div>
   );
 }

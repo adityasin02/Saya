@@ -79,7 +79,6 @@ export function SongTable({ songs }: { songs: Song[] }) {
               <TableHead className="w-[50px]"></TableHead>
               <TableHead>Title</TableHead>
               <TableHead>Artist</TableHead>
-              <TableHead>Album</TableHead>
               <TableHead className="text-right">Actions</TableHead>
             </TableRow>
           </TableHeader>
@@ -117,9 +116,6 @@ export function SongTable({ songs }: { songs: Song[] }) {
                   <TableCell className="text-muted-foreground">
                     {song.artist}
                   </TableCell>
-                  <TableCell className="text-muted-foreground">
-                    {song.album}
-                  </TableCell>
                   <TableCell className="text-right">
                     <DropdownMenu>
                       <DropdownMenuTrigger asChild>
@@ -146,7 +142,7 @@ export function SongTable({ songs }: { songs: Song[] }) {
               ))
             ) : (
               <TableRow>
-                <TableCell colSpan={5} className="h-24 text-center">
+                <TableCell colSpan={4} className="h-24 text-center">
                   No songs found.
                 </TableCell>
               </TableRow>
@@ -182,4 +178,3 @@ export function SongTable({ songs }: { songs: Song[] }) {
     </>
   );
 }
-

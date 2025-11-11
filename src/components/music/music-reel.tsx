@@ -13,24 +13,26 @@ import { localAudio } from '@/lib/local-audio-store';
 
 type MusicReelProps = {
   song: Song;
+  isPlaying: boolean;
+  isActive: boolean;
+  onPlayPause: (playing: boolean) => void;
+  onNext: () => void;
 };
 
 function formatTime(seconds: number) {
+  if (isNaN(seconds)) return '0:00';
   const minutes = Math.floor(seconds / 60);
   const remainingSeconds = Math.floor(seconds % 60);
   return `${minutes}:${remainingSeconds.toString().padStart(2, '0')}`;
 }
 
-export function MusicReel({ song }: MusicReelProps) {
-  const [isPlaying, setIsPlaying] = useState(false);
+export function MusicReel({ song, isPlaying, isActive, onPlayPause, onNext }: MusicReelProps) {
   const [isLiked, setIsLiked] = useState(song.liked);
   const [progress, setProgress] = useState(0);
   const [duration, setDuration] = useState(0);
   const [currentTime, setCurrentTime] = useState(0);
 
   const audioRef = useRef<HTMLAudioElement | null>(null);
-
-  // When the component mounts or the song ID changes, get the audio source
   const audioSrc = song.audioSrc || localAudio.get(song.id);
 
   useEffect(() => {
@@ -38,27 +40,39 @@ export function MusicReel({ song }: MusicReelProps) {
       if (audioRef.current.src !== audioSrc) {
         audioRef.current.src = audioSrc;
       }
+    }
+  }, [audioSrc]);
+
+  useEffect(() => {
+    if (isActive) {
       if (isPlaying) {
-        audioRef.current.play().catch(error => console.error("Error playing audio:", error));
+        audioRef.current?.play().catch(error => console.error("Error playing audio:", error));
       } else {
-        audioRef.current.pause();
+        audioRef.current?.pause();
+      }
+    } else {
+      audioRef.current?.pause();
+      if(audioRef.current) {
+        audioRef.current.currentTime = 0;
       }
     }
-  }, [isPlaying, audioSrc]);
+  }, [isPlaying, isActive]);
+
 
   const togglePlay = (e: React.MouseEvent) => {
     e.stopPropagation();
-    setIsPlaying(!isPlaying);
+    onPlayPause(!isPlaying);
   };
 
   const toggleLike = (e: React.MouseEvent) => {
     e.stopPropagation();
     setIsLiked(!isLiked);
+    // Here you would also update the like status in your database
   };
   
   const handleNext = (e: React.MouseEvent) => {
     e.stopPropagation();
-    console.log("Next song");
+    onNext();
   };
 
   const handleTimeUpdate = () => {
@@ -73,6 +87,10 @@ export function MusicReel({ song }: MusicReelProps) {
       setDuration(audioRef.current.duration);
     }
   };
+  
+  const handleEnded = () => {
+    onNext();
+  };
 
   const handleSliderChange = (value: number[]) => {
     if (audioRef.current) {
@@ -85,22 +103,22 @@ export function MusicReel({ song }: MusicReelProps) {
   if (!audioSrc) {
     return (
         <div className="relative h-full w-full flex flex-col items-center justify-center overflow-hidden bg-background">
-            <div className="text-center">
+            <div className="text-center p-4">
                 <p className="text-lg text-muted-foreground">Audio for this song is not available on this device.</p>
-                <p className="text-sm text-muted-foreground/50">Please re-upload the file.</p>
+                <p className="text-sm text-muted-foreground/50">Please re-upload the file to play.</p>
             </div>
         </div>
     )
   }
 
   return (
-    <div className="relative h-full w-full flex flex-col items-center justify-center overflow-hidden" onClick={() => setIsPlaying(p => !p)}>
+    <div className="relative h-full w-full flex flex-col items-center justify-center overflow-hidden" onClick={() => onPlayPause(!isPlaying)}>
       <audio
         ref={audioRef}
         src={audioSrc}
         onTimeUpdate={handleTimeUpdate}
         onLoadedMetadata={handleLoadedMetadata}
-        onEnded={() => setIsPlaying(false)}
+        onEnded={handleEnded}
       />
       {/* Background Gradient */}
       <div className="absolute inset-0 z-0">
@@ -128,13 +146,13 @@ export function MusicReel({ song }: MusicReelProps) {
                 />
                 <div className={cn(
                     "absolute inset-0 flex items-center justify-center transition-opacity duration-500",
-                    isPlaying ? "opacity-100" : "opacity-0"
+                    isPlaying && isActive ? "opacity-100" : "opacity-0"
                 )}>
                     <Waveform />
                 </div>
                 <div className={cn(
                     "absolute inset-0 rounded-full bg-black/40 flex items-center justify-center transition-opacity duration-300",
-                    isPlaying ? "opacity-0 hover:opacity-100" : "opacity-100"
+                    isPlaying && isActive ? "opacity-0 hover:opacity-100" : "opacity-100"
                 )}>
                      <Button
                         variant="ghost"
@@ -143,7 +161,7 @@ export function MusicReel({ song }: MusicReelProps) {
                         onClick={togglePlay}
                         aria-label={isPlaying ? 'Pause song' : 'Play song'}
                     >
-                        {isPlaying ? (
+                        {isPlaying && isActive ? (
                           <Pause className="w-12 h-12 fill-current" />
                         ) : (
                           <Play className="w-12 h-12 fill-current ml-1" />
@@ -163,14 +181,14 @@ export function MusicReel({ song }: MusicReelProps) {
             {/* Duration Slider */}
             <div className='mb-6 w-full' onClick={(e) => e.stopPropagation()}>
                 <Slider 
-                    value={[progress]} 
+                    value={isActive ? [progress] : [0]}
                     max={100} 
                     step={1} 
                     className="w-full"
                     onValueChange={handleSliderChange}
                 />
                 <div className="flex justify-between text-xs text-muted-foreground mt-1.5">
-                    <span>{formatTime(currentTime)}</span>
+                    <span>{formatTime(isActive ? currentTime: 0)}</span>
                     <span>{formatTime(duration)}</span>
                 </div>
             </div>

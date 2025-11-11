@@ -35,11 +35,8 @@ export function UploadSongDialog({ isOpen, setIsOpen, userId }: UploadSongDialog
     setIsProcessing(false);
   };
 
-  const handleFileChange = async (event: React.ChangeEvent<HTMLInputElement>) => {
-    const file = event.target.files?.[0];
-    if (!file) return;
-
-    setIsProcessing(true);
+  const processFile = async (file: File) => {
+    if (!file.type.startsWith("audio/")) return;
 
     try {
       const audioDataUrl = await new Promise<string>((resolve, reject) => {
@@ -56,47 +53,76 @@ export function UploadSongDialog({ isOpen, setIsOpen, userId }: UploadSongDialog
       });
 
       const songForDb = {
-        title: file.name.replace(/\.[^/.]+$/, ""), // Use filename as title
+        title: file.name.replace(/\.[^/.]+$/, ""),
         artist: "Unknown Artist",
         album: "Unknown Album",
         albumArt: PlaceHolderImages[Math.floor(Math.random() * PlaceHolderImages.length)].imageUrl,
         liked: false,
         dateAdded: serverTimestamp(),
         playCount: 0,
-        // We explicitly DO NOT save the audioSrc to Firestore
       };
 
       const songsCollection = collection(firestore, `users/${userId}/songs`);
-      
-      addDoc(songsCollection, songForDb)
-        .then((docRef) => {
-            // Store the audio source locally with the new document ID
-            localAudio.set(docRef.id, audioDataUrl);
-            toast({
-                title: "Song Added!",
-                description: `${songForDb.title} has been added to your library.`,
-            });
-        })
-        .catch(async (serverError) => {
-            const permissionError = new FirestorePermissionError({
-              path: songsCollection.path,
-              operation: 'create',
-              requestResourceData: songForDb,
-            });
-            errorEmitter.emit('permission-error', permissionError);
+
+      const docRef = await addDoc(songsCollection, songForDb).catch(async (serverError) => {
+        const permissionError = new FirestorePermissionError({
+          path: songsCollection.path,
+          operation: 'create',
+          requestResourceData: songForDb,
         });
+        errorEmitter.emit('permission-error', permissionError);
+        throw serverError; // re-throw to be caught by the outer try/catch
+      });
+      
+      // Store the audio source locally with the new document ID
+      localAudio.set(docRef.id, audioDataUrl);
+      
+      return songForDb.title;
 
     } catch (error) {
-      console.error("Error processing song:", error);
-      toast({
-        variant: "destructive",
-        title: "Processing Failed",
-        description: "There was an error processing your song.",
-      });
-    } finally {
-      setIsOpen(false);
-      resetState();
+      console.error("Error processing song:", file.name, error);
+      throw new Error(`Failed to process ${file.name}`);
     }
+  };
+
+  const handleFileChange = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    const files = event.target.files;
+    if (!files || files.length === 0) return;
+
+    setIsProcessing(true);
+    
+    const fileList = Array.from(files);
+    const totalFiles = fileList.length;
+    let successfulUploads = 0;
+
+    for (const file of fileList) {
+        try {
+            const title = await processFile(file);
+            if (title) {
+                successfulUploads++;
+            }
+        } catch (error) {
+            // Error is already logged in processFile
+        }
+    }
+
+    if (successfulUploads > 0) {
+      toast({
+        title: "Upload Complete",
+        description: `${successfulUploads} of ${totalFiles} song(s) have been added to your library.`,
+      });
+    }
+
+    if (successfulUploads < totalFiles) {
+        toast({
+            variant: "destructive",
+            title: "Upload Incomplete",
+            description: `Could not process ${totalFiles - successfulUploads} file(s). See console for details.`,
+        });
+    }
+
+    setIsOpen(false);
+    resetState();
   };
 
   const handleDialogClose = (open: boolean) => {
@@ -110,9 +136,9 @@ export function UploadSongDialog({ isOpen, setIsOpen, userId }: UploadSongDialog
     <Dialog open={isOpen} onOpenChange={handleDialogClose}>
       <DialogContent className="sm:max-w-md">
         <DialogHeader>
-          <DialogTitle>Upload Song</DialogTitle>
+          <DialogTitle>Upload Songs</DialogTitle>
           <DialogDescription>
-            Select an audio file from your device to add it to your library.
+            Select audio files or a folder to add to your library.
           </DialogDescription>
         </DialogHeader>
 
@@ -128,11 +154,21 @@ export function UploadSongDialog({ isOpen, setIsOpen, userId }: UploadSongDialog
                 <>
                   <UploadCloud className="w-10 h-10 mb-3" />
                   <p className="mb-2 text-sm"><span className="font-semibold">Click to upload</span> or drag and drop</p>
-                  <p className="text-xs">MP3, FLAC, WAV, etc.</p>
+                  <p className="text-xs">Files or a Folder (MP3, FLAC, WAV, etc.)</p>
                 </>
               )}
             </div>
-            <Input id="audio-file-input" type="file" accept="audio/*" className="hidden" onChange={handleFileChange} disabled={isProcessing} />
+            <Input 
+              id="audio-file-input" 
+              type="file" 
+              accept="audio/*" 
+              className="hidden" 
+              onChange={handleFileChange} 
+              disabled={isProcessing}
+              multiple
+              // @ts-ignore
+              webkitdirectory="true" 
+            />
           </Label>
         </div>
       </DialogContent>

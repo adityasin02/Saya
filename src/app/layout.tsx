@@ -33,11 +33,13 @@ export default function RootLayout({
           rel="stylesheet"
         />
       </head>
-      <body className={cn("font-body antialiased bg-background text-foreground", "overscroll-none")}>
+      <body className={cn("font-body antialiased bg-black text-foreground", "overscroll-none")}>
         <FirebaseClientProvider>
-          <AppLayout>
-            {children}
-          </AppLayout>
+          <div className="relative mx-auto flex h-screen max-h-screen w-full max-w-[min(100vw,calc(100vh*9/16))] flex-col overflow-hidden bg-background shadow-2xl">
+            <AppLayout>
+              {children}
+            </AppLayout>
+          </div>
         </FirebaseClientProvider>
         <Toaster />
       </body>

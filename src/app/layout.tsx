@@ -4,7 +4,6 @@ import { Toaster } from "@/components/ui/toaster";
 import AppLayout from "@/components/layout/app-layout";
 import { cn } from '@/lib/utils';
 import { FirebaseClientProvider } from '@/firebase';
-import { MusicPlayerProvider } from '@/context/music-player-context';
 
 export const metadata: Metadata = {
   title: 'Saya',
@@ -26,11 +25,9 @@ export default function RootLayout({
       </head>
       <body className={cn("font-body antialiased bg-background text-foreground", "overscroll-none")}>
         <FirebaseClientProvider>
-          <MusicPlayerProvider>
             <AppLayout>
               {children}
             </AppLayout>
-          </MusicPlayerProvider>
         </FirebaseClientProvider>
         <Toaster />
       </body>

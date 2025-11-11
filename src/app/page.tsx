@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState, useEffect } from 'react';
+import { useMemo, useState } from 'react';
 import { useCollection, useUser, useFirestore, useMemoFirebase } from "@/firebase";
 import { collection } from 'firebase/firestore';
 import { ReelFeed } from '@/components/music/reel-feed';
@@ -10,7 +10,6 @@ import { UploadSongButton } from '@/components/music/upload-song-button';
 import { Button } from '@/components/ui/button';
 import { Plus } from 'lucide-react';
 import { UploadSongDialog } from "@/components/music/upload-song-dialog";
-import { useMusicPlayer } from '@/context/music-player-context';
 
 export default function HomePage() {
   const { user, isUserLoading } = useUser();
@@ -18,7 +17,6 @@ export default function HomePage() {
   const searchParams = useSearchParams();
   const songId = searchParams.get('songId');
   const [isUploadDialogOpen, setIsUploadDialogOpen] = useState(false);
-  const { setPlaylist } = useMusicPlayer();
 
   const songsCollection = useMemoFirebase(() => {
     if (!user) return null;
@@ -29,23 +27,18 @@ export default function HomePage() {
 
   const songs = useMemo(() => {
     if (!allSongs) return [];
+    let initialSongs = allSongs.map(s => ({...s, audioSrc: ''}));
 
-    let songs: Song[] = [...allSongs];
     if (songId) {
-      const selectedSongIndex = songs.findIndex(song => song.id === songId);
+      const selectedSongIndex = initialSongs.findIndex(song => song.id === songId);
       if (selectedSongIndex > -1) {
-        const selectedSong = songs.splice(selectedSongIndex, 1)[0];
-        songs.unshift(selectedSong);
+        const selectedSong = initialSongs.splice(selectedSongIndex, 1)[0];
+        initialSongs.unshift(selectedSong);
       }
     }
-    return songs;
+    return initialSongs;
   }, [allSongs, songId]);
 
-  useEffect(() => {
-    if (songs && songs.length > 0) {
-      setPlaylist(songs, songId ? 0 : undefined);
-    }
-  }, [songs, setPlaylist, songId]);
 
   const isLoading = isUserLoading || areSongsLoading;
 
@@ -60,7 +53,7 @@ export default function HomePage() {
   return (
     <div className="h-screen w-full relative">
        {songs && songs.length > 0 ? (
-        <ReelFeed />
+        <ReelFeed songs={songs} />
       ) : (
         <div className="h-screen w-full flex flex-col items-center justify-center text-center p-4">
           <p className="text-lg mb-4">No songs in your library yet.</p>

@@ -6,7 +6,7 @@ export type Song = {
   artist: string;
   album: string;
   albumArt: string;
-  audioSrc?: string; // audioSrc is optional now
+  audioSrc: string;
   liked: boolean;
   dateAdded?: FieldValue;
   playCount?: number;

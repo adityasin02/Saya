@@ -3,13 +3,15 @@
 
 import React, { useState, useRef, useEffect } from 'react';
 import Image from 'next/image';
-import { Heart, Play, Pause, Shuffle } from 'lucide-react';
+import { Heart, Play, Pause, Shuffle, Music } from 'lucide-react';
 import type { Song } from '@/types';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
 import { Waveform } from './waveform';
 import { Slider } from '@/components/ui/slider';
 import { localAudio } from '@/lib/local-audio-store';
+import { UploadSongDialog } from './upload-song-dialog';
+import { useUser } from '@/firebase';
 
 type MusicReelProps = {
   song: Song;
@@ -102,11 +104,12 @@ export function MusicReel({ song, isPlaying, isActive, onPlayPause, onNext }: Mu
 
   if (!audioSrc) {
     return (
-        <div className="relative h-full w-full flex flex-col items-center justify-center overflow-hidden bg-background">
-            <div className="text-center p-4">
-                <p className="text-lg text-muted-foreground">Audio for this song is not available on this device.</p>
-                <p className="text-sm text-muted-foreground/50">Please re-upload the file to play.</p>
-            </div>
+        <div className="relative h-full w-full flex flex-col items-center justify-center overflow-hidden bg-background text-center p-8">
+             <Music className="w-16 h-16 text-muted-foreground/50 mb-4" />
+            <h2 className="text-xl font-semibold text-muted-foreground">Audio Not Available on this Device</h2>
+            <p className="text-sm text-muted-foreground/70 mt-2 max-w-sm">
+                This app plays music directly from your device. The audio for "{song.title}" needs to be re-selected to play. This happens if you've refreshed the page or are on a new device.
+            </p>
         </div>
     )
   }

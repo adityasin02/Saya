@@ -1,6 +1,7 @@
+
 "use client";
 
-import React, { useEffect } from 'react';
+import React, { useEffect, useCallback } from 'react';
 import useEmblaCarousel from 'embla-carousel-react';
 import { type EmblaOptionsType } from 'embla-carousel';
 import { MusicReel } from './music-reel';
@@ -21,7 +22,10 @@ export function ReelFeed() {
     if (!emblaApi) return;
     
     const onSelect = () => {
-      playSongAt(emblaApi.selectedScrollSnap());
+      const selectedIndex = emblaApi.selectedScrollSnap();
+      if (selectedIndex !== currentSongIndex) {
+        playSongAt(selectedIndex);
+      }
     };
 
     emblaApi.on('select', onSelect);
@@ -30,7 +34,7 @@ export function ReelFeed() {
     return () => {
       emblaApi.off('select', onSelect);
     };
-  }, [emblaApi, playSongAt]);
+  }, [emblaApi, playSongAt, currentSongIndex]);
 
   useEffect(() => {
     if (emblaApi && emblaApi.selectedScrollSnap() !== currentSongIndex) {

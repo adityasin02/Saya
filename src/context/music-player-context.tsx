@@ -47,9 +47,11 @@ export function MusicPlayerProvider({ children }: { children: ReactNode }) {
     audio.volume = 0.7;
 
     const handleTimeUpdate = () => {
-      setCurrentTime(audio.currentTime);
-      setDuration(audio.duration);
-      setProgress(audio.duration > 0 ? (audio.currentTime / audio.duration) * 100 : 0);
+      if (!audio.seeking) {
+        setCurrentTime(audio.currentTime);
+        setDuration(audio.duration);
+        setProgress(audio.duration > 0 ? (audio.currentTime / audio.duration) * 100 : 0);
+      }
     };
 
     const handleEnded = () => playNext();
@@ -70,43 +72,56 @@ export function MusicPlayerProvider({ children }: { children: ReactNode }) {
       audio.removeEventListener('canplay', handleCanPlay);
       audio.pause();
     };
-  }, [isPlaying]); // Add isPlaying dependency
+  }, []);
 
   const playNext = useCallback(() => {
     setCurrentSongIndex((prevIndex) => (prevIndex + 1) % playlist.length);
+    setIsPlaying(true);
   }, [playlist.length]);
   
   useEffect(() => {
     if (currentSong && audioRef.current) {
         const audioSrc = localAudio.get(currentSong.id);
+        
+        // Only change src if it's different to prevent re-loading the same audio
         if (audioSrc && audioRef.current.src !== audioSrc) {
             audioRef.current.src = audioSrc;
-            currentSong.audioSrc = audioSrc;
-            // The 'canplay' event listener will handle playing
+            // The 'canplay' event will handle playing if isPlaying is true.
         } else if (!audioSrc) {
+            audioRef.current.src = ''; // Clear src if not available
             audioRef.current.pause();
         }
         
-        if (isPlaying && audioSrc && audioRef.current.readyState >= 3) { // HAVE_FUTURE_DATA or more
-            audioRef.current.play().catch(e => console.error("Error playing audio:", e));
-        } else if (!isPlaying) {
+        if (isPlaying && audioSrc) {
+            // Check if ready to play, otherwise the 'canplay' event will handle it
+            if (audioRef.current.readyState >= 2) { // HAVE_CURRENT_DATA or more
+                audioRef.current.play().catch(e => console.error("Error playing audio:", e));
+            }
+        } else {
             audioRef.current.pause();
         }
     } else if (audioRef.current) {
         audioRef.current.pause();
+        audioRef.current.src = '';
     }
   }, [currentSong, isPlaying]);
 
   const setPlaylist = (songs: Song[], startIndex = 0) => {
-    setPlaylistState(songs);
+    setPlaylistState(songs.map(s => ({...s, audioSrc: localAudio.get(s.id)})));
     setCurrentSongIndex(startIndex);
-    setIsPlaying(false); // Don't auto-play, wait for user action
+    setIsPlaying(false);
   };
 
   const playSongAt = (index: number) => {
     if (index >= 0 && index < playlist.length) {
-      setCurrentSongIndex(index);
-      setIsPlaying(true);
+      if (index === currentSongIndex) {
+        // If it's the same song, just toggle play/pause
+        togglePlayPause();
+      } else {
+        // If it's a new song, switch to it and start playing
+        setCurrentSongIndex(index);
+        setIsPlaying(true);
+      }
     }
   };
 
@@ -115,13 +130,13 @@ export function MusicPlayerProvider({ children }: { children: ReactNode }) {
     setIsPlaying(prev => !prev);
   };
 
-
   const playPrevious = () => {
     setCurrentSongIndex((prevIndex) => (prevIndex - 1 + playlist.length) % playlist.length);
+    setIsPlaying(true);
   };
 
   const seek = (percentage: number) => {
-    if (audioRef.current && isFinite(duration)) {
+    if (audioRef.current && isFinite(duration) && duration > 0) {
       audioRef.current.currentTime = (percentage / 100) * duration;
     }
   };

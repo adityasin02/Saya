@@ -4,6 +4,7 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { Home, Music, Heart, Settings } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { useMusicPlayer } from '@/context/music-player-context';
 
 const navItems = [
   { href: '/', icon: Home, label: 'Home' },
@@ -14,9 +15,13 @@ const navItems = [
 
 export default function BottomNav() {
   const pathname = usePathname();
+  const { currentSong } = useMusicPlayer();
 
   return (
-    <div className="fixed bottom-0 left-0 right-0 z-50 border-t border-border/80 bg-background/80 backdrop-blur-md">
+    <div className={cn(
+      "fixed bottom-0 left-0 right-0 z-50 border-t border-border/80 bg-background/80 backdrop-blur-md",
+      currentSong && "pb-16"
+    )}>
       <nav className="flex h-16 items-center justify-around max-w-lg mx-auto">
         {navItems.map((item) => {
           const isActive = pathname === item.href;

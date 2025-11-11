@@ -1,15 +1,10 @@
-
 "use client";
 
-import React, { useState, useEffect, useCallback } from 'react';
-import useEmblaCarousel, { type EmblaAPI } from 'embla-carousel-react';
+import React, { useEffect } from 'react';
+import useEmblaCarousel from 'embla-carousel-react';
 import { type EmblaOptionsType } from 'embla-carousel';
-import { type Song } from '@/types';
 import { MusicReel } from './music-reel';
-
-type ReelFeedProps = {
-  songs: Song[];
-};
+import { useMusicPlayer } from '@/context/music-player-context';
 
 const OPTIONS: EmblaOptionsType = {
   axis: 'y',
@@ -17,45 +12,39 @@ const OPTIONS: EmblaOptionsType = {
   align: 'start',
 };
 
-export function ReelFeed({ songs }: ReelFeedProps) {
-  const [emblaRef, emblaApi] = useEmblaCarousel(OPTIONS);
-  const [activeIndex, setActiveIndex] = useState(0);
-  const [isPlaying, setIsPlaying] = useState(false);
-
-  const onSelect = useCallback((emblaApi: EmblaAPI) => {
-    setActiveIndex(emblaApi.selectedScrollSnap());
-    setIsPlaying(true); // Autoplay on swipe
-  }, []);
+export function ReelFeed() {
+  const { playlist, currentSongIndex, playSongAt } = useMusicPlayer();
+  const [emblaRef, emblaApi] = useEmblaCarousel({ ...OPTIONS, startIndex: currentSongIndex });
 
   useEffect(() => {
     if (!emblaApi) return;
+    const onSelect = () => {
+      playSongAt(emblaApi.selectedScrollSnap());
+    };
     emblaApi.on('select', onSelect);
-    // Set initial active index
-    setActiveIndex(emblaApi.selectedScrollSnap());
     return () => {
       emblaApi.off('select', onSelect);
     };
-  }, [emblaApi, onSelect]);
+  }, [emblaApi, playSongAt]);
 
-  const handlePlayPause = (playing: boolean) => {
-    setIsPlaying(playing);
-  };
+  useEffect(() => {
+    if (emblaApi && emblaApi.selectedScrollSnap() !== currentSongIndex) {
+      emblaApi.scrollTo(currentSongIndex);
+    }
+  }, [currentSongIndex, emblaApi]);
 
-  const handleNext = useCallback(() => {
-    emblaApi?.scrollNext();
-  }, [emblaApi]);
+  if (!playlist || playlist.length === 0) {
+    return null;
+  }
 
   return (
     <div className="h-full overflow-hidden" ref={emblaRef}>
       <div className="flex flex-col h-full">
-        {songs.map((song, index) => (
+        {playlist.map((song, index) => (
           <div className="relative flex-[0_0_100%] h-full" key={song.id}>
             <MusicReel 
               song={song} 
-              isPlaying={isPlaying}
-              isActive={index === activeIndex}
-              onPlayPause={handlePlayPause}
-              onNext={handleNext}
+              isActive={index === currentSongIndex}
             />
           </div>
         ))}

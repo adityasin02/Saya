@@ -10,8 +10,10 @@ import { Button } from '@/components/ui/button';
 import { Waveform } from './waveform';
 import { Slider } from '@/components/ui/slider';
 import { localAudio } from '@/lib/local-audio-store';
-import { UploadSongDialog } from './upload-song-dialog';
-import { useUser } from '@/firebase';
+import { useUser, useFirestore } from '@/firebase';
+import { doc } from 'firebase/firestore';
+import { updateDocumentNonBlocking } from '@/firebase/non-blocking-updates';
+import { useToast } from '@/hooks/use-toast';
 
 type MusicReelProps = {
   song: Song;
@@ -33,9 +35,17 @@ export function MusicReel({ song, isPlaying, isActive, onPlayPause, onNext }: Mu
   const [progress, setProgress] = useState(0);
   const [duration, setDuration] = useState(0);
   const [currentTime, setCurrentTime] = useState(0);
+  
+  const { user } = useUser();
+  const firestore = useFirestore();
+  const { toast } = useToast();
 
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const audioSrc = song.audioSrc || localAudio.get(song.id);
+  
+  useEffect(() => {
+    setIsLiked(song.liked);
+  }, [song.liked]);
 
   useEffect(() => {
     if (audioRef.current && audioSrc) {
@@ -68,8 +78,18 @@ export function MusicReel({ song, isPlaying, isActive, onPlayPause, onNext }: Mu
 
   const toggleLike = (e: React.MouseEvent) => {
     e.stopPropagation();
-    setIsLiked(!isLiked);
-    // Here you would also update the like status in your database
+    if (!user || !firestore) return;
+
+    const newLikedStatus = !isLiked;
+    setIsLiked(newLikedStatus);
+
+    const songRef = doc(firestore, `users/${user.uid}/songs/${song.id}`);
+    updateDocumentNonBlocking(songRef, { liked: newLikedStatus });
+    
+    toast({
+        title: newLikedStatus ? "Added to Favorites" : "Removed from Favorites",
+        description: `"${song.title}" has been updated.`,
+    });
   };
   
   const handleNext = (e: React.MouseEvent) => {

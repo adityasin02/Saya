@@ -137,7 +137,7 @@ export function UploadSongDialog({ isOpen, setIsOpen, userId }: UploadSongDialog
         <DialogHeader>
           <DialogTitle>Upload Songs</DialogTitle>
           <DialogDescription>
-            Select audio files from your device to add to your library.
+            Select a folder with audio files from your device to add to your library.
           </DialogDescription>
         </DialogHeader>
 
@@ -152,8 +152,8 @@ export function UploadSongDialog({ isOpen, setIsOpen, userId }: UploadSongDialog
               ) : (
                 <>
                   <UploadCloud className="w-10 h-10 mb-3" />
-                  <p className="mb-2 text-sm"><span className="font-semibold">Click to upload</span> or drag and drop</p>
-                  <p className="text-xs">Select songs (MP3, FLAC, WAV, etc.)</p>
+                  <p className="mb-2 text-sm"><span className="font-semibold">Click to upload a folder</span></p>
+                  <p className="text-xs">Select a folder containing your songs</p>
                 </>
               )}
             </div>
@@ -165,6 +165,7 @@ export function UploadSongDialog({ isOpen, setIsOpen, userId }: UploadSongDialog
               onChange={handleFileChange} 
               disabled={isProcessing}
               multiple
+              webkitdirectory=""
             />
           </Label>
         </div>

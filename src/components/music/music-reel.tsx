@@ -33,6 +33,7 @@ export function MusicReel({ song, isActive, onNext }: MusicReelProps) {
   const [duration, setDuration] = useState(0);
   const [currentTime, setCurrentTime] = useState(0);
   const [isLiked, setIsLiked] = useState(song.liked);
+  const [isSeeking, setIsSeeking] = useState(false);
   const audioRef = useRef<HTMLAudioElement | null>(null);
 
   const { user } = useUser();
@@ -60,10 +61,10 @@ export function MusicReel({ song, isActive, onNext }: MusicReelProps) {
       const audioSrc = localAudio.get(song.id);
 
       const updateProgress = () => {
-        if (!audio.seeking) {
-            setCurrentTime(audio.currentTime);
-            setDuration(audio.duration);
-            setProgress((audio.currentTime / audio.duration) * 100 || 0);
+        if (!audio.seeking && !isSeeking) {
+          setCurrentTime(audio.currentTime);
+          setDuration(audio.duration);
+          setProgress((audio.currentTime / audio.duration) * 100 || 0);
         }
       };
       const handleSongEnd = () => onNext();
@@ -72,7 +73,7 @@ export function MusicReel({ song, isActive, onNext }: MusicReelProps) {
         audio.play().catch(e => console.error('Audio play failed on canplay', e));
         setIsPlaying(true);
       };
-      
+
       audio.addEventListener('timeupdate', updateProgress);
       audio.addEventListener('ended', handleSongEnd);
       audio.addEventListener('canplay', handleCanPlay);
@@ -93,12 +94,12 @@ export function MusicReel({ song, isActive, onNext }: MusicReelProps) {
         audio.removeEventListener('canplay', handleCanPlay);
       };
     } else {
-        if (audioRef.current) {
-            audioRef.current.pause();
-            setIsPlaying(false);
-        }
+      if (audioRef.current) {
+        audioRef.current.pause();
+        setIsPlaying(false);
+      }
     }
-  }, [isActive, song.id, onNext]);
+  }, [isActive, song.id, onNext, isSeeking]);
 
   useEffect(() => {
     return () => {
@@ -111,11 +112,19 @@ export function MusicReel({ song, isActive, onNext }: MusicReelProps) {
   }, []);
 
   const handleSeek = (value: number[]) => {
-    if (audioRef.current && isFinite(audioRef.current.duration)) {
+    if (audioRef.current && isFinite(audioRef.current.duration) && isSeeking) {
       const newTime = (value[0] / 100) * audioRef.current.duration;
       audioRef.current.currentTime = newTime;
       setProgress(value[0]);
     }
+  };
+
+  const handlePointerDown = () => {
+    setIsSeeking(true);
+  };
+  
+  const handlePointerUp = () => {
+    setIsSeeking(false);
   };
 
   const handleLike = (e: React.MouseEvent) => {
@@ -162,9 +171,13 @@ export function MusicReel({ song, isActive, onNext }: MusicReelProps) {
         <div className="absolute inset-0 bg-black/60 bg-gradient-to-b from-black/30 via-black/50 to-black/80" />
       </div>
 
-      <div className="relative z-10 flex flex-col items-center justify-center text-center text-foreground w-full h-full p-8 pb-24">
-        <div className="flex-1 flex items-center justify-center">
-          <div className="relative w-64 h-64 md:w-80 md:h-80">
+      <div className="relative z-10 flex flex-col items-center justify-between text-center text-foreground w-full h-full p-8">
+        {/* Top Spacer */}
+        <div />
+
+        {/* Middle Content (Album Art) */}
+        <div className="flex-shrink-0" onClick={(e) => e.stopPropagation()}>
+           <div className="relative w-64 h-64 md:w-80 md:h-80">
             <Image
               src={song.albumArt}
               alt={`Album art for ${song.title}`}
@@ -184,62 +197,69 @@ export function MusicReel({ song, isActive, onNext }: MusicReelProps) {
           </div>
         </div>
 
+        {/* Bottom Controls */}
         <div className="w-full max-w-md">
-          <div className="mb-6">
+          <div className="mb-4 text-left">
             <h1 className="text-3xl font-bold tracking-tight">{song.title}</h1>
             <p className="text-lg text-muted-foreground mt-1">{song.artist}</p>
           </div>
 
-          <div className="flex items-center justify-between w-full mb-4">
-            <Button
-              variant="ghost"
-              size="icon"
-              className="w-16 h-16 rounded-full"
-              onClick={e => {
-                e.stopPropagation();
-                handleLike(e);
-              }}
-              aria-label="Like song"
-            >
-              <Heart
-                className={cn(
-                  'w-8 h-8 transition-all',
-                  isLiked ? 'text-primary fill-current' : 'text-foreground'
+          <div className="flex items-center justify-between w-full mb-2">
+            <div className="flex items-center gap-4">
+              <Button
+                variant="ghost"
+                size="icon"
+                className="w-12 h-12 rounded-full"
+                onClick={e => {
+                  e.stopPropagation();
+                  togglePlayPause();
+                }}
+                aria-label={isPlaying ? 'Pause song' : 'Play song'}
+              >
+                {isPlaying ? (
+                  <Pause className="w-8 h-8 fill-current" />
+                ) : (
+                  <Play className="w-8 h-8 fill-current ml-1" />
                 )}
-              />
-            </Button>
+              </Button>
+              <Button
+                variant="ghost"
+                size="icon"
+                className="w-12 h-12 rounded-full"
+                onClick={e => {
+                  e.stopPropagation();
+                  handleLike(e);
+                }}
+                aria-label="Like song"
+              >
+                <Heart
+                  className={cn(
+                    'w-7 h-7 transition-all',
+                    isLiked ? 'text-primary fill-current' : 'text-foreground'
+                  )}
+                />
+              </Button>
+            </div>
             <Button
               variant="ghost"
               size="icon"
-              className="w-20 h-20 rounded-full bg-foreground/10"
-              onClick={e => {
-                e.stopPropagation();
-                togglePlayPause();
-              }}
-              aria-label={isPlaying ? 'Pause song' : 'Play song'}
+              className="w-12 h-12 rounded-full"
+              aria-label="More options"
             >
-              {isPlaying ? (
-                <Pause className="w-10 h-10 fill-current" />
-              ) : (
-                <Play className="w-10 h-10 fill-current ml-1" />
-              )}
-            </Button>
-            <Button
-              variant="ghost"
-              size="icon"
-              className="w-16 h-16 rounded-full"
-              onClick={e => {
-                e.stopPropagation();
-                onNext();
-              }}
-              aria-label="Shuffle/Next"
-            >
-              <SkipForward className="w-7 h-7 text-foreground" />
+              <ListMusic className="w-6 h-6 text-foreground" />
             </Button>
           </div>
 
           <div className="w-full" onClick={e => e.stopPropagation()}>
-            <Slider value={[progress]} max={100} step={1} className="w-full" onValueChange={handleSeek} />
+            <Slider 
+              value={[progress]} 
+              max={100} 
+              step={0.1} 
+              className="w-full" 
+              onValueChange={handleSeek}
+              onPointerDown={handlePointerDown}
+              onPointerUp={handlePointerUp}
+            />
             <div className="flex justify-between text-xs text-muted-foreground mt-1.5">
               <span>{formatTime(currentTime)}</span>
               <span>{formatTime(duration)}</span>

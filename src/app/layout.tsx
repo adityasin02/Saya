@@ -3,7 +3,6 @@ import './globals.css';
 import { Toaster } from "@/components/ui/toaster";
 import { cn } from '@/lib/utils';
 import { Providers } from './providers';
-import AppLayout from '@/components/layout/app-layout';
 
 export const metadata: Metadata = {
   title: 'Saya',
@@ -33,11 +32,7 @@ export default function RootLayout({
       </head>
       <body className={cn("font-body antialiased bg-black text-foreground", "overscroll-none")}>
         <div className="relative mx-auto flex h-screen max-h-screen w-full max-w-[min(100vw,calc(100vh*9/16))] flex-col overflow-hidden bg-background shadow-2xl">
-          <Providers>
-            <AppLayout>
-              {children}
-            </AppLayout>
-          </Providers>
+          <Providers>{children}</Providers>
         </div>
         <Toaster />
       </body>

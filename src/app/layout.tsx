@@ -1,17 +1,14 @@
 import type { Metadata, Viewport } from 'next';
 import './globals.css';
 import { Toaster } from "@/components/ui/toaster";
-import AppLayout from "@/components/layout/app-layout";
 import { cn } from '@/lib/utils';
-import { FirebaseClientProvider } from '@/firebase';
+import { Providers } from '@/app/providers';
 
-// ✅ Correct metadata (viewport removed)
 export const metadata: Metadata = {
   title: 'Saya',
   description: 'A modern, AI-powered music player with a reel-style interface.',
 };
 
-// ✅ New separate viewport export (Next.js requirement)
 export const viewport: Viewport = {
   width: 'device-width',
   initialScale: 1,
@@ -34,13 +31,9 @@ export default function RootLayout({
         />
       </head>
       <body className={cn("font-body antialiased bg-black text-foreground", "overscroll-none")}>
-        <FirebaseClientProvider>
-          <div className="relative mx-auto flex h-screen max-h-screen w-full max-w-[min(100vw,calc(100vh*9/16))] flex-col overflow-hidden bg-background shadow-2xl">
-            <AppLayout>
-              {children}
-            </AppLayout>
-          </div>
-        </FirebaseClientProvider>
+        <div className="relative mx-auto flex h-screen max-h-screen w-full max-w-[min(100vw,calc(100vh*9/16))] flex-col overflow-hidden bg-background shadow-2xl">
+          <Providers>{children}</Providers>
+        </div>
         <Toaster />
       </body>
     </html>

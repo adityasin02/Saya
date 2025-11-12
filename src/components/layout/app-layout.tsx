@@ -4,10 +4,15 @@ import type { ReactNode } from 'react';
 import BottomNav from './bottom-nav';
 import { useAuth, useFirebase } from '@/firebase';
 import { initiateAnonymousSignIn } from '@/firebase/non-blocking-login';
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 
 export default function AppLayout({ children }: { children: ReactNode }) {
+  const [isMounted, setIsMounted] = useState(false);
   const firebase = useFirebase();
+
+  useEffect(() => {
+    setIsMounted(true);
+  }, []);
 
   // Guard clause to handle server-side rendering where context is null
   if (!firebase) {
@@ -21,6 +26,10 @@ export default function AppLayout({ children }: { children: ReactNode }) {
       initiateAnonymousSignIn(auth);
     }
   }, [user, isUserLoading, auth]);
+
+  if (!isMounted) {
+    return null;
+  }
 
   return (
     <div className="relative flex min-h-screen w-full flex-col">

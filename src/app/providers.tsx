@@ -2,14 +2,14 @@
 
 import type { ReactNode } from 'react';
 import { FirebaseClientProvider } from '@/firebase';
-import AppLayout from '@/components/layout/app-layout';
+import { MusicPlayerProvider } from '@/context/music-player-context';
 
-export function AppProvider({ children }: { children: ReactNode }) {
+export function Providers({ children }: { children: ReactNode }) {
   return (
     <FirebaseClientProvider>
-      <AppLayout>
+      <MusicPlayerProvider>
         {children}
-      </AppLayout>
+      </MusicPlayerProvider>
     </FirebaseClientProvider>
   );
 }

@@ -2,7 +2,8 @@ import type { Metadata, Viewport } from 'next';
 import './globals.css';
 import { Toaster } from "@/components/ui/toaster";
 import { cn } from '@/lib/utils';
-import { AppProvider } from '@/app/app-provider';
+import { Providers } from './providers';
+import AppLayout from '@/components/layout/app-layout';
 
 export const metadata: Metadata = {
   title: 'Saya',
@@ -32,9 +33,11 @@ export default function RootLayout({
       </head>
       <body className={cn("font-body antialiased bg-black text-foreground", "overscroll-none")}>
         <div className="relative mx-auto flex h-screen max-h-screen w-full max-w-[min(100vw,calc(100vh*9/16))] flex-col overflow-hidden bg-background shadow-2xl">
-          <AppProvider>
-            {children}
-          </AppProvider>
+          <Providers>
+            <AppLayout>
+              {children}
+            </AppLayout>
+          </Providers>
         </div>
         <Toaster />
       </body>

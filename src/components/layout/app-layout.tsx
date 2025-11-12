@@ -7,11 +7,17 @@ import { initiateAnonymousSignIn } from '@/firebase/non-blocking-login';
 import { useEffect } from 'react';
 
 export default function AppLayout({ children }: { children: ReactNode }) {
-  const { user, isUserLoading } = useFirebase();
-  const auth = useAuth();
+  const firebase = useFirebase();
+
+  // Guard clause to handle server-side rendering where context is null
+  if (!firebase) {
+    return null; // or a loading spinner
+  }
+
+  const { user, isUserLoading, auth } = firebase;
 
   useEffect(() => {
-    if (!isUserLoading && !user) {
+    if (!isUserLoading && !user && auth) {
       initiateAnonymousSignIn(auth);
     }
   }, [user, isUserLoading, auth]);

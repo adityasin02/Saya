@@ -5,8 +5,6 @@ import BottomNav from './bottom-nav';
 import { useAuth, useFirebase } from '@/firebase';
 import { initiateAnonymousSignIn } from '@/firebase/non-blocking-login';
 import { useEffect } from 'react';
-import { cn } from '@/lib/utils';
-import { ScrollArea } from '../ui/scroll-area';
 
 export default function AppLayout({ children }: { children: ReactNode }) {
   const { user, isUserLoading } = useFirebase();

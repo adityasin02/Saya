@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from 'react';
+import { useMemo, useState, Suspense } from 'react';
 import { useCollection, useUser, useFirestore, useMemoFirebase } from "@/firebase";
 import { collection } from 'firebase/firestore';
 import { ReelFeed } from '@/components/music/reel-feed';
@@ -11,7 +11,7 @@ import { Button } from '@/components/ui/button';
 import { Plus } from 'lucide-react';
 import { UploadSongDialog } from "@/components/music/upload-song-dialog";
 
-export default function HomePage() {
+function HomePageContent() {
   const { user, isUserLoading } = useUser();
   const firestore = useFirestore();
   const searchParams = useSearchParams();
@@ -79,5 +79,14 @@ export default function HomePage() {
         </>
       )}
     </div>
+  );
+}
+
+
+export default function HomePage() {
+  return (
+    <Suspense fallback={<div className="h-screen w-full flex items-center justify-center"><p>Loading your music...</p></div>}>
+      <HomePageContent />
+    </Suspense>
   );
 }
